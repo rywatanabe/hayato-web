@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="hayato-version" content="2026.11.17.1">
+<meta name="hayato-version" content="2026.11.17.2">
 <meta http-equiv="Cache-Control" content="no-cache">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>HAYATO 請求入力</title>
@@ -141,7 +141,7 @@ body.sea #blocks .box button.copy.done,body.sea #plist .box button.copy.done{bac
 <div id="updbar" style="display:none;position:fixed;top:0;left:0;right:0;z-index:20;background:#185FA5;color:#fff;text-align:center;padding:8px;font-size:14px">HAYATOの新しい版があります ・ <a href="#" id="updgo" style="color:#fff;font-weight:bold;text-decoration:underline">今すぐ更新</a></div>
 <script>
 (function(){
-  var V="2026.11.17.1";
+  var V="2026.11.17.2";
   try{ if(/[?&]v=/.test(location.search)) history.replaceState(null,"",location.pathname+location.hash); }catch(e){}
   function latest(){ return fetch(location.pathname+"?nc="+Date.now(),{cache:"no-store"}).then(function(r){return r.text();}).then(function(t){ var m=t.match(/name="hayato-version" content="([^"]+)"/); return m?m[1]:null; }).catch(function(){return null;}); }
   function go(){ location.replace(location.pathname+"?v="+Date.now()); }
@@ -153,7 +153,7 @@ body.sea #blocks .box button.copy.done,body.sea #plist .box button.copy.done{bac
   document.addEventListener("click",function(e){ var id=e.target&&e.target.id; if(id==="updgo"||id==="upd"){ e.preventDefault(); go(); } });
 })();
 </script>
-<div id="who" style="display:none;position:fixed;top:8px;right:12px;z-index:5;font-size:12px;background:rgba(255,255,255,.9);border:1px solid #c9dbec;border-radius:16px;padding:3px 10px"><span id="whoe"></span> ・ <span style="color:#888">v2026.11.17.1</span> ・ <a href="#" id="upd" style="color:#185FA5">最新版に更新</a> ・ <a href="#" id="logout" style="color:#185FA5">ログアウト</a></div>
+<style>#who{display:none;position:fixed;top:0;left:0;right:0;z-index:15;height:48px;box-sizing:border-box;padding:0 18px;align-items:center;gap:14px;background:linear-gradient(90deg,#0C447C,#185FA5);color:#fff;box-shadow:0 2px 8px rgba(0,0,0,.25);font-family:"Yu Gothic UI","Meiryo",sans-serif}#who .hb{font-weight:800;font-style:italic;font-size:19px;letter-spacing:2px}#who .hb i{color:#F0997B;font-size:14px;margin-left:2px}#who .sp{flex:1}#who .st{font-size:13px;opacity:.9}#who button{background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.55);border-radius:6px;padding:6px 14px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit}#who button:hover{background:rgba(255,255,255,.25)}body.hdr{padding-top:68px}#updbar{top:48px!important}</style><div id="who"><span class="hb">HAYATO<i>›››</i></span><span id="whoe" style="font-size:13px"></span><span class="sp"></span><span class="st" id="hst"></span><span class="st" style="opacity:.6">v2026.11.17.2</span><button id="upd">⟳ 最新を取得</button><button id="logout">ログアウト</button></div>
 <div class="shell">
   <div class="hero"><div class="hv hv-def" style="width:100%;align-items:center;gap:18px;background:#0C447C;border-radius:10px;padding:16px 18px;overflow:hidden">
 <svg width="132" height="96" viewBox="0 0 132 96" aria-hidden="true" style="flex:0 0 auto">
@@ -858,7 +858,7 @@ function fixPkg(q){
   }
   function enter(session){
     $("lmsg").textContent = "データを読み込んでいます…";
-    loadMasters().then(function (){ $("login").style.display = "none"; $("who").style.display = "block"; $("whoe").textContent = session.user.email; })
+    loadMasters().then(function (){ $("login").style.display = "none"; $("who").style.display = "flex"; document.body.classList.add("hdr"); var d=new Date(); $("hst").textContent="準備完了 "+d.toTimeString().slice(0,8); $("whoe").textContent = session.user.email; })
       .catch(function (e){ $("lmsg").textContent = "データを読み込めませんでした：" + (e.message || e); });
   }
   SB.auth.getSession().then(function (r){ if (r.data && r.data.session) enter(r.data.session); });
