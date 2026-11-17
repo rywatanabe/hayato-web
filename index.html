@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HAYATO 請求入力</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#eef3f8;--panel:#fff;--line:#c9dbec;--ink:#1f3347;--soft:#5d7286;--acc:#185FA5;--warn:#a5633a}
+*{box-sizing:border-box}
+body{margin:0;padding:24px 16px 60px;background:var(--bg);color:var(--ink);font-family:"Yu Gothic UI","Meiryo",sans-serif;font-size:14px;line-height:1.6}
+.shell{max-width:820px;margin:0 auto}
+.hero{display:flex;align-items:center;gap:16px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 18px;margin-bottom:16px}
+.hero svg{flex:0 0 auto}
+.brand{font-family:"Segoe UI","Yu Gothic UI",sans-serif;font-size:26px;font-weight:700;letter-spacing:4px;color:#3f5a4b;line-height:1}
+.brand small{display:block;font-size:12px;letter-spacing:1px;font-weight:500;color:var(--soft);margin-top:6px}
+h1{font-size:20px;font-weight:600;margin:0 0 4px}
+.sub{color:var(--soft);font-size:12.5px;margin:0 0 18px}
+.drop{display:block;border:1.5px dashed var(--line);border-radius:8px;background:var(--panel);padding:26px;text-align:center;cursor:pointer;color:var(--soft)}
+.drop.on{border-color:var(--acc);color:var(--acc)}
+.drop input{display:none}
+.file{margin-top:8px;font-size:12px;color:var(--soft)}
+.err{display:none;margin-top:10px;padding:10px 12px;border-left:3px solid var(--warn);background:#f8ece4;color:var(--warn);font-size:13px;white-space:pre-wrap}
+.box{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:14px 16px;margin-top:14px}
+.box h2{font-size:14px;font-weight:600;margin:0 0 4px;display:flex;align-items:center;gap:10px}
+.box h2 .n{display:inline-flex;width:22px;height:22px;border-radius:50%;background:var(--acc);color:#fff;font-size:12px;align-items:center;justify-content:center}
+.how{font-size:12.5px;color:var(--soft);margin:0 0 8px}
+table.pv{border-collapse:collapse;margin:0 0 10px;font-size:12.5px;width:100%}
+table.pv th{font-weight:normal;color:var(--soft);text-align:right;padding:3px 6px 3px 10px;white-space:nowrap;width:1%}
+table.pv td{font-family:"Consolas","MS Gothic",monospace;padding:3px 8px;border-bottom:1px solid var(--line)}
+table.pv td.empty{color:#b7aea2}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:8px 12px}
+.grid label{font-size:11.5px;color:var(--soft);display:block}
+.grid input{width:100%;padding:5px 7px;border:1px solid var(--line);border-radius:4px;font:inherit;font-size:13px;background:#fff}
+pre{margin:0;padding:10px;background:#f7f4ee;border:1px solid var(--line);border-radius:4px;font-family:"MS Gothic","Consolas",monospace;font-size:12px;overflow-x:auto;white-space:pre}
+button.copy{margin-top:8px;padding:6px 16px;border:1px solid var(--acc);background:#fff;color:var(--acc);border-radius:4px;font:inherit;font-size:13px;cursor:pointer}
+button.copy.done{background:var(--acc);color:#fff}
+.sum{display:flex;gap:18px;flex-wrap:wrap;font-size:13px}
+.sum b{font-size:15px}
+.warn{color:var(--warn);font-size:12.5px;margin-top:6px}
+#out{display:none}
+.res{border:1px solid var(--line);border-radius:6px;margin-top:6px;max-height:260px;overflow:auto;background:#fff}
+.res div{padding:6px 10px;cursor:pointer;font-size:13px;border-bottom:1px solid var(--line)}
+.res div:hover{background:#f1efe8}
+.res b{font-family:Consolas,monospace;font-weight:normal;color:var(--acc);margin-right:10px}
+.sb{display:grid;grid-template-columns:110px 1fr 1.4fr;gap:8px 10px;align-items:end;margin-bottom:6px}
+.sb label{font-size:11.5px;color:var(--soft);display:block}
+.sb input{width:100%;padding:5px 7px;border:1px solid var(--line);border-radius:4px;font:inherit;font-size:13px}
+.final{font-size:13px;margin:0;padding-left:20px}
+
+.lg2{font-family:"Segoe UI",Arial,sans-serif;font-style:italic;font-weight:600;letter-spacing:4px;position:relative;display:inline-block;padding-right:4px}
+.lg2 .o{color:#F0997B}.lg2 .ar{font-size:.42em;color:#F0997B;margin-left:4px;letter-spacing:0;vertical-align:middle}
+.lg2::before,.lg2::after{content:"";position:absolute;left:-30px;right:-10px;height:3px;z-index:-1}
+.lg2::before{top:42%;background:linear-gradient(90deg,transparent,#D85A30 35%,transparent)}
+.lg2::after{top:62%;height:2px;background:linear-gradient(90deg,transparent,#378ADD 45%,transparent)}
+.brand{position:relative;z-index:0}
+.hv-air .lg2 .o,.hv-air .lg2 .ar{color:#D85A30}
+
+/* ロゴを主役に：大きく、中央に */
+body:not(.air):not(.sea) .hv-def{flex-direction:column;justify-content:center;text-align:center;padding:30px 18px 22px!important;background:radial-gradient(ellipse at 50% 40%,#185FA5 0%,#0C447C 55%,#042C53 100%)!important}
+body:not(.air):not(.sea) .hv-def > svg{width:96px;height:70px;opacity:.9}
+body:not(.air):not(.sea) .hv-def .brand{font-size:76px!important;letter-spacing:12px!important;line-height:1.05}
+body:not(.air):not(.sea) .hv-def .brand + div{font-size:13px!important;letter-spacing:6px!important}
+body:not(.air):not(.sea) .hv-def .brand ~ div:last-child{justify-content:center}
+body:not(.air):not(.sea) .hv-def .lg2::before{height:5px;left:-70px;right:-40px}
+body:not(.air):not(.sea) .hv-def .lg2::after{height:3px;left:-50px;right:-60px}
+.hv-air .brand{font-size:44px!important}
+.hv-sea .brand{font-size:50px!important}
+@media (max-width:560px){body:not(.air):not(.sea) .hv-def .brand{font-size:46px!important;letter-spacing:6px!important}}
+
+/* 背景の景色：航空＝夜の国際空港、海上＝夜の港（ガントリークレーン） */
+body.air{background:#04182E url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxNjAwIDkwMCIgcHJlc2VydmVBc3BlY3RSYXRpbz0ieE1pZFlNYXggc2xpY2UiPgo8ZGVmcz48bGluZWFyR3JhZGllbnQgaWQ9ImciIHgxPSIwIiB5MT0iMCIgeDI9IjAiIHkyPSIxIj48c3RvcCBvZmZzZXQ9IjAiIHN0b3AtY29sb3I9IiMwNDE4MkUiLz48c3RvcCBvZmZzZXQ9Ii43IiBzdG9wLWNvbG9yPSIjMEIyRDUwIi8+PHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjMTYzQTVFIi8+PC9saW5lYXJHcmFkaWVudD4KPGcgaWQ9ImoiPjxwYXRoIGQ9Ik0wIDEwIFEyIDYgMTAgNiBINzAgUTc4IDYgODAgMTAgUTc4IDE0IDcwIDE0IEgxMCBRMiAxNCAwIDEwWiIgZmlsbD0iI0U2RjFGQiIvPjxwYXRoIGQ9Ik0zMCAxMCBMNDYgMTAgTDU4IDI2IEw1MiAyNloiIGZpbGw9IiNCNUQ0RjQiLz48cGF0aCBkPSJNNzIgNiBMODIgLTggTDg2IC04IEw4MCA4WiIgZmlsbD0iI0I1RDRGNCIvPjxnIGZpbGw9IiMzNzhBREQiPjxjaXJjbGUgY3g9IjE4IiBjeT0iOSIgcj0iLjkiLz48Y2lyY2xlIGN4PSIyMiIgY3k9IjkiIHI9Ii45Ii8+PGNpcmNsZSBjeD0iMjYiIGN5PSI5IiByPSIuOSIvPjxjaXJjbGUgY3g9IjUwIiBjeT0iOSIgcj0iLjkiLz48Y2lyY2xlIGN4PSI1NCIgY3k9IjkiIHI9Ii45Ii8+PC9nPjwvZz48L2RlZnM+CjxyZWN0IHdpZHRoPSIxNjAwIiBoZWlnaHQ9IjkwMCIgZmlsbD0idXJsKCNnKSIvPgo8ZyBmaWxsPSIjZmZmIiBvcGFjaXR5PSIuNSI+PGNpcmNsZSBjeD0iODAiIGN5PSI2MCIgcj0iMS41Ii8+PGNpcmNsZSBjeD0iMjYwIiBjeT0iMTQwIiByPSIxLjIiLz48Y2lyY2xlIGN4PSIxMzIwIiBjeT0iODAiIHI9IjEuNSIvPjxjaXJjbGUgY3g9IjE1MDAiIGN5PSIxNjAiIHI9IjEuMiIvPjxjaXJjbGUgY3g9IjE4MCIgY3k9IjMwMCIgcj0iMSIvPjxjaXJjbGUgY3g9IjE0NTAiIGN5PSIzMjAiIHI9IjEiLz48Y2lyY2xlIGN4PSI2MCIgY3k9IjQyMCIgcj0iMSIvPjwvZz4KPHBhdGggZD0iTTYwIDQyMCBMMzAwIDI1MCIgc3Ryb2tlPSIjODVCN0VCIiBzdHJva2Utd2lkdGg9IjEuNSIgb3BhY2l0eT0iLjMiLz4KPHVzZSBocmVmPSIjaiIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjAwIDMwMCkgcm90YXRlKC0yNCkgc2NhbGUoMS40KSIvPgo8ZyBmb250LWZhbWlseT0ibW9ub3NwYWNlIiBmb250LXNpemU9IjE4IiBmaWxsPSIjRkFDNzc1IiBvcGFjaXR5PSIuODUiPjx0ZXh0IHg9IjExMCIgeT0iNDIwIj5ERVAgIEpMMTIgICBERlcgIE9OIFRJTUU8L3RleHQ+PHRleHQgeD0iMTEwIiB5PSI0NDgiPkRFUCAgTkgyMDMgIEZSQSAgQk9BUkRJTkc8L3RleHQ+PHRleHQgeD0iMTEwIiB5PSI0NzYiPkRFUCAgSkw0MSAgIExIUiAgR0FURSA2NDwvdGV4dD48L2c+CjxnIHRyYW5zZm9ybT0idHJhbnNsYXRlKDEzODAgMzQwKSBzY2FsZSgyKSI+PHBhdGggZD0iTTE4IDE5NCBMMjQgNjAgTDMyIDYwIEwzOCAxOTRaIiBmaWxsPSIjMUI0NjcwIi8+PHBhdGggZD0iTTAgNTAgTDU2IDUwIEw1MCA2MiBMNiA2MloiIGZpbGw9IiMxQjQ2NzAiLz48cGF0aCBkPSJNNCAzMCBMNTIgMzAgTDU2IDUwIEwwIDUwWiIgZmlsbD0iIzJBNUU4RSIvPjxyZWN0IHg9IjUiIHk9IjM0IiB3aWR0aD0iNDYiIGhlaWdodD0iMTAiIGZpbGw9IiNGQUM3NzUiLz48cGF0aCBkPSJNOCAzMCBMNDggMzAgTDQyIDIyIEwxNCAyMloiIGZpbGw9IiMxQjQ2NzAiLz48bGluZSB4MT0iMjgiIHkxPSIyMiIgeDI9IjI4IiB5Mj0iMCIgc3Ryb2tlPSIjMUI0NjcwIiBzdHJva2Utd2lkdGg9IjIiLz48Y2lyY2xlIGN4PSIyOCIgY3k9Ii0yIiByPSIzIiBmaWxsPSIjRTI0QjRBIi8+PC9nPgo8ZyB0cmFuc2Zvcm09InRyYW5zbGF0ZSgwIDQyMCkgc2NhbGUoMi4zNTMgMS42KSI+CjxwYXRoIGQ9Ik0yMCAyMDAgUTMwMCAxNDAgNTkwIDE5NiBMNTkwIDI4NiBMMjAgMjg2WiIgZmlsbD0iIzJBNUU4RSIvPjxwYXRoIGQ9Ik0yMCAyMDAgUTMwMCAxNDAgNTkwIDE5NiBMNTkwIDIxMCBRMzAwIDE1NiAyMCAyMTRaIiBmaWxsPSIjMzc4QUREIi8+PHBhdGggZD0iTTIwIDIwMCBRMzAwIDE0MCA1OTAgMTk2IiBzdHJva2U9IiNCNUQ0RjQiIHN0cm9rZS13aWR0aD0iMiIgZmlsbD0ibm9uZSIvPgo8ZyBmaWxsPSIjRkFDNzc1IiBvcGFjaXR5PSIuOSI+PHJlY3QgeD0iNDAiIHk9IjIyNiIgd2lkdGg9IjUzMCIgaGVpZ2h0PSIxMCIvPjxyZWN0IHg9IjQwIiB5PSIyNDYiIHdpZHRoPSI1MzAiIGhlaWdodD0iMTAiLz48L2c+PHJlY3QgeD0iNDAiIHk9IjI2NiIgd2lkdGg9IjUzMCIgaGVpZ2h0PSI4IiBmaWxsPSIjRkFFRURBIiBvcGFjaXR5PSIuNyIvPgo8ZyBzdHJva2U9IiMyQTVFOEUiIHN0cm9rZS13aWR0aD0iMyI+PGxpbmUgeDE9IjgwIiB5MT0iMjIyIiB4Mj0iODAiIHkyPSIyNzYiLz48bGluZSB4MT0iMTI1IiB5MT0iMjIwIiB4Mj0iMTI1IiB5Mj0iMjc2Ii8+PGxpbmUgeDE9IjE3MCIgeTE9IjIxOCIgeDI9IjE3MCIgeTI9IjI3NiIvPjxsaW5lIHgxPSIyMTUiIHkxPSIyMTYiIHgyPSIyMTUiIHkyPSIyNzYiLz48bGluZSB4MT0iMjYwIiB5MT0iMjE1IiB4Mj0iMjYwIiB5Mj0iMjc2Ii8+PGxpbmUgeDE9IjMwNSIgeTE9IjIxNCIgeDI9IjMwNSIgeTI9IjI3NiIvPjxsaW5lIHgxPSIzNTAiIHkxPSIyMTQiIHgyPSIzNTAiIHkyPSIyNzYiLz48bGluZSB4MT0iMzk1IiB5MT0iMjE1IiB4Mj0iMzk1IiB5Mj0iMjc2Ii8+PGxpbmUgeDE9IjQ0MCIgeTE9IjIxNiIgeDI9IjQ0MCIgeTI9IjI3NiIvPjxsaW5lIHgxPSI0ODUiIHkxPSIyMTgiIHgyPSI0ODUiIHkyPSIyNzYiLz48bGluZSB4MT0iNTMwIiB5MT0iMjIwIiB4Mj0iNTMwIiB5Mj0iMjc2Ii8+PC9nPgo8cmVjdCB4PSIyNTAiIHk9IjE3NiIgd2lkdGg9IjExMCIgaGVpZ2h0PSIxNCIgcng9IjIiIGZpbGw9IiMwQzQ0N0MiIHN0cm9rZT0iI0I1RDRGNCIvPjx0ZXh0IHg9IjMwNSIgeT0iMTg3IiBmaWxsPSIjRTZGMUZCIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iOSIgbGV0dGVyLXNwYWNpbmc9IjIiIHRleHQtYW5jaG9yPSJtaWRkbGUiPklOVEVSTkFUSU9OQUw8L3RleHQ+CjxnIGZpbGw9IiMxQjQ2NzAiPjxyZWN0IHg9IjExMCIgeT0iMjg0IiB3aWR0aD0iNDQiIGhlaWdodD0iNyIvPjxyZWN0IHg9IjI5MCIgeT0iMjg0IiB3aWR0aD0iNDQiIGhlaWdodD0iNyIvPjxyZWN0IHg9IjQ3MCIgeT0iMjg0IiB3aWR0aD0iNDQiIGhlaWdodD0iNyIvPjxyZWN0IHg9IjE1MCIgeT0iMjkxIiB3aWR0aD0iNSIgaGVpZ2h0PSIxNCIvPjxyZWN0IHg9IjMzMCIgeT0iMjkxIiB3aWR0aD0iNSIgaGVpZ2h0PSIxNCIvPjxyZWN0IHg9IjUxMCIgeT0iMjkxIiB3aWR0aD0iNSIgaGVpZ2h0PSIxNCIvPjwvZz4KPHVzZSBocmVmPSIjaiIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTMwIDI5NikiLz48dXNlIGhyZWY9IiNqIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgzMTAgMjk2KSIvPjx1c2UgaHJlZj0iI2oiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDQ5MCAyOTYpIi8+PC9nPgo8cmVjdCB5PSI4NzAiIHdpZHRoPSIxNjAwIiBoZWlnaHQ9IjMwIiBmaWxsPSIjMDcxQTJEIi8+CjxnIGZpbGw9IiNGQUM3NzUiPjxjaXJjbGUgY3g9IjQwIiBjeT0iODc0IiByPSIzIi8+PGNpcmNsZSBjeD0iMTYwIiBjeT0iODc0IiByPSIzIi8+PGNpcmNsZSBjeD0iMjgwIiBjeT0iODc0IiByPSIzIi8+PGNpcmNsZSBjeD0iNDAwIiBjeT0iODc0IiByPSIzIi8+PGNpcmNsZSBjeD0iNTIwIiBjeT0iODc0IiByPSIzIi8+PGNpcmNsZSBjeD0iNjQwIiBjeT0iODc0IiByPSIzIi8+PGNpcmNsZSBjeD0iNzYwIiBjeT0iODc0IiByPSIzIi8+PGNpcmNsZSBjeD0iODgwIiBjeT0iODc0IiByPSIzIi8+PGNpcmNsZSBjeD0iMTAwMCIgY3k9Ijg3NCIgcj0iMyIvPjxjaXJjbGUgY3g9IjExMjAiIGN5PSI4NzQiIHI9IjMiLz48Y2lyY2xlIGN4PSIxMjQwIiBjeT0iODc0IiByPSIzIi8+PGNpcmNsZSBjeD0iMTM2MCIgY3k9Ijg3NCIgcj0iMyIvPjxjaXJjbGUgY3g9IjE0ODAiIGN5PSI4NzQiIHI9IjMiLz48L2c+Cjwvc3ZnPgo=") center bottom/cover no-repeat fixed}
+body.sea{background:#0B1B2B url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxNjAwIDkwMCIgcHJlc2VydmVBc3BlY3RSYXRpbz0ieE1pZFlNYXggc2xpY2UiPgo8ZGVmcz48bGluZWFyR3JhZGllbnQgaWQ9ImciIHgxPSIwIiB5MT0iMCIgeDI9IjAiIHkyPSIxIj48c3RvcCBvZmZzZXQ9IjAiIHN0b3AtY29sb3I9IiMwQjFCMkIiLz48c3RvcCBvZmZzZXQ9Ii42NSIgc3RvcC1jb2xvcj0iIzE0MzA0QSIvPjxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iIzBCMUIyQiIvPjwvbGluZWFyR3JhZGllbnQ+CjxnIGlkPSJjIj4KPGcgc3Ryb2tlPSIjRDg1QTMwIiBzdHJva2Utd2lkdGg9IjUiIGZpbGw9Im5vbmUiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPjxwYXRoIGQ9Ik0wIDI1MCBMOCAxMjAgTTYwIDI1MCBMNTIgMTIwIi8+PHBhdGggZD0iTTAgMjUwIEw2MCAyNTAiIHN0cm9rZS13aWR0aD0iMyIvPjxwYXRoIGQ9Ik00IDE5MCBMNTYgMTkwIE04IDEyMCBMNTIgMTIwIiBzdHJva2Utd2lkdGg9IjQiLz48cGF0aCBkPSJNNiAxODYgTDU0IDEyNCBNNTQgMTg2IEw2IDEyNCIgc3Ryb2tlLXdpZHRoPSIyLjUiLz48L2c+CjxnIGZpbGw9IiMyQzJDMkEiPjxjaXJjbGUgY3g9IjIiIGN5PSIyNTQiIHI9IjQiLz48Y2lyY2xlIGN4PSIxMiIgY3k9IjI1NCIgcj0iNCIvPjxjaXJjbGUgY3g9IjUwIiBjeT0iMjU0IiByPSI0Ii8+PGNpcmNsZSBjeD0iNjAiIGN5PSIyNTQiIHI9IjQiLz48L2c+CjxnIHN0cm9rZT0iI0Q4NUEzMCIgc3Ryb2tlLXdpZHRoPSI0IiBmaWxsPSJub25lIj48cGF0aCBkPSJNMTQgMTIwIEwzMCA0MCBMNDYgMTIwIi8+PHBhdGggZD0iTTIyIDgwIEwzOCA4MCIgc3Ryb2tlLXdpZHRoPSIyLjUiLz48L2c+CjxyZWN0IHg9Ii00MCIgeT0iMTEyIiB3aWR0aD0iMjUwIiBoZWlnaHQ9IjkiIGZpbGw9IiNEODVBMzAiLz4KPHBhdGggZD0iTS0zNiAxMTIgbDggOSBsOCAtOSBsOCA5IGw4IC05IGw4IDkgbDggLTkgbDggOSBsOCAtOSBsOCA5IGw4IC05IGw4IDkgbDggLTkgbDggOSBsOCAtOSBsOCA5IGw4IC05IGw4IDkgbDggLTkgbDggOSBsOCAtOSBsOCA5IGw4IC05IGw4IDkgbDggLTkgbDggOSBsOCAtOSBsOCA5IGw4IC05IGw4IDkgbDggLTkgbDggOSBsOCAtOSIgc3Ryb2tlPSIjOTkzQzFEIiBzdHJva2Utd2lkdGg9IjEuNSIgZmlsbD0ibm9uZSIvPgo8ZyBzdHJva2U9IiNCNEIyQTkiIHN0cm9rZS13aWR0aD0iMS4zIj48bGluZSB4MT0iMzAiIHkxPSI0MCIgeDI9IjEyMCIgeTI9IjExMiIvPjxsaW5lIHgxPSIzMCIgeTE9IjQwIiB4Mj0iMjA1IiB5Mj0iMTEyIi8+PGxpbmUgeDE9IjMwIiB5MT0iNDAiIHgyPSItMzgiIHkyPSIxMTIiLz48L2c+CjxyZWN0IHg9Ii0xMCIgeT0iOTgiIHdpZHRoPSIzNCIgaGVpZ2h0PSIxNCIgZmlsbD0iI0YxRUZFOCIvPjxyZWN0IHg9Ii02IiB5PSIxMDEiIHdpZHRoPSI4IiBoZWlnaHQ9IjUiIGZpbGw9IiNGQUM3NzUiLz48cmVjdCB4PSI2IiB5PSIxMDEiIHdpZHRoPSI4IiBoZWlnaHQ9IjUiIGZpbGw9IiNGQUM3NzUiLz4KPHJlY3QgeD0iMTQwIiB5PSIxMjEiIHdpZHRoPSIyMiIgaGVpZ2h0PSI4IiBmaWxsPSIjNDQ0NDQxIi8+PHJlY3QgeD0iOTYiIHk9IjEyMyIgd2lkdGg9IjEyIiBoZWlnaHQ9IjkiIGZpbGw9IiNGMUVGRTgiLz4KPGcgc3Ryb2tlPSIjQjRCMkE5IiBzdHJva2Utd2lkdGg9IjEiPjxsaW5lIHgxPSIxNDQiIHkxPSIxMjkiIHgyPSIxNDIiIHkyPSIxOTYiLz48bGluZSB4MT0iMTU4IiB5MT0iMTI5IiB4Mj0iMTYwIiB5Mj0iMTk2Ii8+PC9nPgo8cmVjdCB4PSIxMzQiIHk9IjE5NiIgd2lkdGg9IjM0IiBoZWlnaHQ9IjQiIGZpbGw9IiNGQUM3NzUiLz48cmVjdCB4PSIxMzIiIHk9IjIwMCIgd2lkdGg9IjM4IiBoZWlnaHQ9IjE2IiBmaWxsPSIjMTg1RkE1Ii8+CjxjaXJjbGUgY3g9IjMwIiBjeT0iMzYiIHI9IjMiIGZpbGw9IiNFMjRCNEEiLz48Y2lyY2xlIGN4PSIyMDgiIGN5PSIxMTAiIHI9IjIuNSIgZmlsbD0iI0UyNEI0QSIvPjwvZz48L2RlZnM+CjxyZWN0IHdpZHRoPSIxNjAwIiBoZWlnaHQ9IjkwMCIgZmlsbD0idXJsKCNnKSIvPgo8ZyBmaWxsPSIjZmZmIiBvcGFjaXR5PSIuNDUiPjxjaXJjbGUgY3g9IjcwMCIgY3k9IjYwIiByPSIxLjIiLz48Y2lyY2xlIGN4PSI5MDAiIGN5PSIxMjAiIHI9IjEuMiIvPjxjaXJjbGUgY3g9IjExMDAiIGN5PSI1MCIgcj0iMSIvPjxjaXJjbGUgY3g9IjUwMCIgY3k9IjE0MCIgcj0iMSIvPjwvZz4KPGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTUwIDM5MCkgc2NhbGUoMS42KSI+PHVzZSBocmVmPSIjYyIvPjwvZz4KPGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTQ1MCAzOTApIHNjYWxlKC0xLjYgMS42KSI+PHVzZSBocmVmPSIjYyIvPjwvZz4KPGcgZm9udC1mYW1pbHk9Im1vbm9zcGFjZSIgZm9udC1zaXplPSIxOCIgZmlsbD0iIzVEQ0FBNSIgb3BhY2l0eT0iLjkiPjx0ZXh0IHg9IjExMCIgeT0iMzAwIj5CRVJUSCAzICAgRVRBIDA5OjMwPC90ZXh0PjwvZz4KPGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMCA3NDApIj4KPHJlY3QgeD0iMCIgeT0iMCIgd2lkdGg9IjcwIiBoZWlnaHQ9IjMwIiBmaWxsPSIjOTkzQzFEIi8+PHJlY3QgeD0iNzIiIHk9IjAiIHdpZHRoPSI3MCIgaGVpZ2h0PSIzMCIgZmlsbD0iIzBGNkU1NiIvPjxyZWN0IHg9IjAiIHk9IjMyIiB3aWR0aD0iNzAiIGhlaWdodD0iMzAiIGZpbGw9IiM0NDQ0NDEiLz48cmVjdCB4PSI3MiIgeT0iMzIiIHdpZHRoPSI3MCIgaGVpZ2h0PSIzMCIgZmlsbD0iIzE4NUZBNSIvPjxyZWN0IHg9IjI2MCIgeT0iMCIgd2lkdGg9IjcwIiBoZWlnaHQ9IjMwIiBmaWxsPSIjODU0RjBCIi8+PHJlY3QgeD0iMzMyIiB5PSIwIiB3aWR0aD0iNzAiIGhlaWdodD0iMzAiIGZpbGw9IiMxODVGQTUiLz48cmVjdCB4PSIyNjAiIHk9IjMyIiB3aWR0aD0iNzAiIGhlaWdodD0iMzAiIGZpbGw9IiM5OTNDMUQiLz48cmVjdCB4PSIzMzIiIHk9IjMyIiB3aWR0aD0iNzAiIGhlaWdodD0iMzAiIGZpbGw9IiMwRjZFNTYiLz4KPHJlY3QgeD0iMTIwMCIgeT0iMCIgd2lkdGg9IjcwIiBoZWlnaHQ9IjMwIiBmaWxsPSIjMEY2RTU2Ii8+PHJlY3QgeD0iMTI3MiIgeT0iMCIgd2lkdGg9IjcwIiBoZWlnaHQ9IjMwIiBmaWxsPSIjODU0RjBCIi8+PHJlY3QgeD0iMTIwMCIgeT0iMzIiIHdpZHRoPSI3MCIgaGVpZ2h0PSIzMCIgZmlsbD0iIzE4NUZBNSIvPjxyZWN0IHg9IjEyNzIiIHk9IjMyIiB3aWR0aD0iNzAiIGhlaWdodD0iMzAiIGZpbGw9IiM0NDQ0NDEiLz48cmVjdCB4PSIxNDYwIiB5PSIwIiB3aWR0aD0iNzAiIGhlaWdodD0iMzAiIGZpbGw9IiM5OTNDMUQiLz48cmVjdCB4PSIxNTMyIiB5PSIwIiB3aWR0aD0iNzAiIGhlaWdodD0iMzAiIGZpbGw9IiMxODVGQTUiLz48cmVjdCB4PSIxNDYwIiB5PSIzMiIgd2lkdGg9IjcwIiBoZWlnaHQ9IjMwIiBmaWxsPSIjMEY2RTU2Ii8+PHJlY3QgeD0iMTUzMiIgeT0iMzIiIHdpZHRoPSI3MCIgaGVpZ2h0PSIzMCIgZmlsbD0iIzg1NEYwQiIvPjwvZz4KPHJlY3QgeT0iODAyIiB3aWR0aD0iMTYwMCIgaGVpZ2h0PSIxMiIgZmlsbD0iIzJDMkMyQSIvPjxyZWN0IHk9IjgxNCIgd2lkdGg9IjE2MDAiIGhlaWdodD0iODYiIGZpbGw9IiMwQTFBMjkiLz4KPGcgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMzc4QUREIiBzdHJva2Utd2lkdGg9IjEuNSIgb3BhY2l0eT0iLjQiPjxwYXRoIGQ9Ik0wIDg0MCBxNDAgLTggODAgMCB0ODAgMCB0ODAgMCB0ODAgMCB0ODAgMCB0ODAgMCB0ODAgMCB0ODAgMCB0ODAgMCB0ODAgMCB0ODAgMCB0ODAgMCB0ODAgMCB0ODAgMCB0ODAgMCB0ODAgMCB0ODAgMCB0ODAgMCB0ODAgMCB0ODAgMCIvPjxwYXRoIGQ9Ik0wIDg3MCBxNDAgLTggODAgMCB0ODAgMCB0ODAgMCB0ODAgMCB0ODAgMCB0ODAgMCB0ODAgMCB0ODAgMCB0ODAgMCB0ODAgMCB0ODAgMCB0ODAgMCB0ODAgMCB0ODAgMCB0ODAgMCB0ODAgMCB0ODAgMCB0ODAgMCB0ODAgMCB0ODAgMCIvPjwvZz4KPC9zdmc+Cg==") center bottom/cover no-repeat fixed}
+body.air .sub,body.sea .sub,body.air .file,body.sea .file{color:#B5D4F4}
+body.air .drop,body.sea .drop{background:rgba(255,255,255,.92)}
+
+/* 説明文はシックな明朝 */
+.sub,.how{font-family:"Noto Serif JP","Yu Mincho","YuMincho","Hiragino Mincho ProN",serif;font-weight:500;letter-spacing:.03em;line-height:1.9}
+.sub{font-size:14px;color:#3a3f47}
+body.air .sub,body.sea .sub{color:#d3dbe4}
+/* ===== テーマ：航空＝搭乗券／海上＝コンテナ船（指示書の種類で自動切替） ===== */
+body.air,body.sea{--bg:#eef3f8;--panel:#fff;--line:#c9dbec;--ink:#1f3347;--soft:#5d7286;--acc:#185FA5}
+body.air .brand,body.sea .brand{color:#0C447C}
+.hero{position:relative;overflow:hidden}
+.hv{display:none}
+body:not(.air):not(.sea) .hv-def{display:flex}
+body:not(.air):not(.sea) .hero{padding:0;border:none;background:none}
+body.air .hv-air{display:flex}
+body.sea .hv-sea{display:block}
+body.air .hero,body.sea .hero{padding:0;border:none;background:none}
+.hv-air{width:100%;background:#fff;border:1px solid #B5D4F4;border-radius:10px;overflow:hidden}
+.hv-air .main{flex:1;padding:12px 16px}
+.hv-air .tag{display:inline-block;background:#185FA5;color:#fff;border-radius:5px;padding:2px 8px;font-size:11px;letter-spacing:1px}
+.hv-air .stub{width:120px;background:#0C447C;color:#E6F1FB;padding:12px;border-left:2px dashed #85B7EB}
+.hv-air .bar{height:16px;margin-top:6px;background:repeating-linear-gradient(90deg,#E6F1FB 0 2px,transparent 2px 4px,#E6F1FB 4px 5px,transparent 5px 8px)}
+.hv-sea{width:100%;background:#0C447C;border-radius:10px;overflow:hidden;padding:14px 16px 0}
+body.sea .hv-sea .brand{color:#fff}body.sea .hv-sea .brand small{color:#B5D4F4}
+.ft{font-size:10px;color:#5d7286}
+/* 航空：各ブロックを搭乗券（右に半券） */
+body.air #blocks .box,body.air #plist .box{position:relative;padding-right:120px;border-color:#B5D4F4;background:linear-gradient(90deg,#fff calc(100% - 104px),#E6F1FB calc(100% - 104px))}
+body.air #blocks .box::after,body.air #plist .box::after{content:"";position:absolute;top:8px;bottom:8px;right:104px;border-left:2px dashed #85B7EB}
+body.air #blocks .box button.copy,body.air #plist .box button.copy{position:absolute;right:12px;top:50%;transform:translateY(-50%);margin:0;width:82px;padding:6px 4px}
+body.air .box h2 .n{background:#185FA5}
+/* 海上：各ブロックをコンテナ（色違い・リブ付き・右に扉） */
+body.sea #blocks .box,body.sea #plist .box{position:relative;border-radius:4px;padding-left:28px;padding-right:120px;border-width:1px;--c1:#F5C4B3;--c2:#D85A30;--c3:#712B13;
+  background:repeating-linear-gradient(90deg,transparent 0 22px,rgba(0,0,0,.05) 22px 24px),linear-gradient(90deg,var(--c1) calc(100% - 104px),var(--c2) calc(100% - 104px));border-color:var(--c2)}
+body.sea #blocks .box::before,body.sea #plist .box::before{content:"";position:absolute;left:0;top:0;bottom:0;width:14px;background:repeating-linear-gradient(90deg,rgba(0,0,0,.2) 0 2px,transparent 2px 5px)}
+body.sea #blocks .box:nth-child(4n+2),body.sea #plist .box:nth-child(4n+2){--c1:#B5D4F4;--c2:#378ADD;--c3:#0C447C}
+body.sea #blocks .box:nth-child(4n+3),body.sea #plist .box:nth-child(4n+3){--c1:#9FE1CB;--c2:#1D9E75;--c3:#085041}
+body.sea #blocks .box:nth-child(4n),body.sea #plist .box:nth-child(4n){--c1:#FAC775;--c2:#BA7517;--c3:#633806}
+body.sea #blocks .box h2,body.sea #plist .box h2{color:var(--c3)}
+body.sea #blocks .box .how,body.sea #blocks .box .warn{color:var(--c3)}
+body.sea #blocks .box pre,body.sea #plist .box pre,body.sea #blocks table.pv{background:rgba(255,255,255,.8)}
+body.sea .box h2 .n{background:var(--c3,#0C447C)}
+body.sea #blocks .box button.copy,body.sea #plist .box button.copy{position:absolute;right:12px;top:50%;transform:translateY(-50%);margin:0;width:82px;padding:6px 4px;border-color:#fff;color:var(--c3)}
+body.sea #blocks .box button.copy.done,body.sea #plist .box button.copy.done{background:#fff;color:var(--c3)}
+@media (max-width:560px){body.air #blocks .box,body.sea #blocks .box,body.air #plist .box,body.sea #plist .box{padding-right:16px;background-image:none}
+  body.air #blocks .box::after,body.air #plist .box::after{display:none}
+  body.air .box button.copy,body.sea .box button.copy{position:static!important;transform:none!important;margin-top:8px!important}}
+
+</style>
+</head>
+<body>
+<div id="login" style="position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;background:radial-gradient(ellipse at 50% 40%,#185FA5 0%,#0C447C 55%,#042C53 100%)">
+  <form id="lf" style="background:#fff;border-radius:12px;padding:28px 26px;width:min(360px,90vw);box-shadow:0 10px 40px rgba(0,0,0,.3)">
+    <div class="brand" style="text-align:center;font-size:40px;color:#0C447C;margin-bottom:4px"><span class="lg2">HAYAT<span class="o" style="color:#D85A30">O</span><span class="ar" style="color:#D85A30">›››</span></span></div>
+    <div style="text-align:center;font-size:12px;color:#5d7286;margin-bottom:18px">SEINO 国際部 ・ 請求入力ヘルパー</div>
+    <label style="font-size:12px;color:#5d7286">メールアドレス</label>
+    <input id="le" type="email" autocomplete="username" required style="width:100%;padding:8px 10px;border:1px solid #c9dbec;border-radius:6px;margin:4px 0 12px;font:inherit">
+    <label style="font-size:12px;color:#5d7286">パスワード</label>
+    <input id="lp" type="password" autocomplete="current-password" required style="width:100%;padding:8px 10px;border:1px solid #c9dbec;border-radius:6px;margin:4px 0 16px;font:inherit">
+    <button type="submit" style="width:100%;padding:10px;border:none;border-radius:6px;background:#185FA5;color:#fff;font:inherit;font-weight:600;cursor:pointer">ログイン</button>
+    <div id="lmsg" style="font-size:12px;color:#a5633a;margin-top:10px;min-height:16px;text-align:center"></div>
+  </form>
+</div>
+<div id="who" style="display:none;position:fixed;top:8px;right:12px;z-index:5;font-size:12px;background:rgba(255,255,255,.9);border:1px solid #c9dbec;border-radius:16px;padding:3px 10px"><span id="whoe"></span> ・ <a href="#" id="logout" style="color:#185FA5">ログアウト</a></div>
+<div class="shell">
+  <div class="hero"><div class="hv hv-def" style="width:100%;align-items:center;gap:18px;background:#0C447C;border-radius:10px;padding:16px 18px;overflow:hidden">
+<svg width="132" height="96" viewBox="0 0 132 96" aria-hidden="true" style="flex:0 0 auto">
+  <circle cx="66" cy="50" r="38" fill="#185FA5"/>
+  <g fill="none" stroke="#85B7EB" stroke-width="1"><ellipse cx="66" cy="50" rx="38" ry="14"/><ellipse cx="66" cy="50" rx="14" ry="38"/><line x1="28" y1="50" x2="104" y2="50"/><line x1="66" y1="12" x2="66" y2="88"/></g>
+  <path d="M44 34 q6 -6 14 -2 q4 6 -2 10 q-8 2 -12 -8z M74 30 q10 0 12 8 q-6 6 -12 0z M70 58 q10 -2 14 6 q-6 8 -14 4z" fill="#5DCAA5"/>
+  <path d="M8 40 Q66 -10 124 34" fill="none" stroke="#FAC775" stroke-width="2" stroke-dasharray="5 4"/>
+  <path d="M112 22 l12 4 l-10 6 l-1 -4 z" fill="#FAC775"/>
+  <path d="M10 78 Q66 100 122 70" fill="none" stroke="#F0997B" stroke-width="2" stroke-dasharray="5 4"/>
+  <g transform="translate(104 64)"><rect x="2" y="-6" width="5" height="4" fill="#E6F1FB"/><rect x="8" y="-6" width="5" height="4" fill="#FAC775"/><rect x="14" y="-8" width="4" height="6" fill="#E6F1FB"/><path d="M0 -2 h22 l-3 5 h-16z" fill="#E24B4A"/></g>
+</svg>
+<div><div class="brand" style="color:#fff;font-size:32px;letter-spacing:7px"><span class="lg2">HAYAT<span class="o">O</span><span class="ar">›››</span></span></div>
+<div style="font-size:12.5px;color:#B5D4F4;margin-top:6px;letter-spacing:1px">SEINO 国際部 ・ 請求入力ヘルパー</div>
+<div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+<span style="font-size:11.5px;background:#E6F1FB;color:#0C447C;border-radius:4px;padding:2px 9px">✈ AIR　AE・AI</span>
+<span style="font-size:11.5px;background:#E1F5EE;color:#085041;border-radius:4px;padding:2px 9px">⚓ SEA　SE・SI</span></div></div></div><div class="hv hv-air"><div class="main"><span class="tag">BOARDING PASS</span> <span class="ft">SEINO 国際部 ・ 請求入力ヘルパー</span>
+<div style="display:flex;align-items:center;gap:12px;margin-top:6px;flex-wrap:wrap"><div class="brand" style="font-size:30px;letter-spacing:6px"><span class="lg2">HAYAT<span class="o">O</span><span class="ar">›››</span></span></div>
+<div style="display:flex;align-items:center;gap:8px;margin-left:auto"><div style="text-align:center"><div class="ft">FROM</div><div style="font-size:18px;color:#0C447C">指示書</div></div>
+<svg width="26" height="26" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 13l8-1 5-8h2l-2 8 5 0 2-2h2l-1 3 1 3h-2l-2-2-5 0 2 8h-2l-5-8-8-1z" fill="#D85A30"/></svg>
+<div style="text-align:center"><div class="ft">TO</div><div style="font-size:18px;color:#0C447C">端末</div></div></div></div></div>
+<div class="stub"><div class="ft" style="color:#B5D4F4">GATE</div><div style="font-size:20px;font-weight:600">Ctrl+V</div><div class="bar"></div></div></div><div class="hv hv-sea"><div style="display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap"><div class="brand" style="font-size:30px;letter-spacing:6px"><span class="lg2">HAYAT<span class="o">O</span><span class="ar">›››</span></span><small>SEINO 国際部 ・ 請求入力ヘルパー</small></div>
+<svg viewBox="0 0 300 92" width="300" height="92" style="margin-left:auto;max-width:100%" aria-hidden="true">
+<rect x="40" y="38" width="22" height="14" fill="#D85A30"/><rect x="63" y="38" width="22" height="14" fill="#378ADD"/><rect x="86" y="38" width="22" height="14" fill="#1D9E75"/><rect x="109" y="38" width="22" height="14" fill="#BA7517"/><rect x="132" y="38" width="22" height="14" fill="#D85A30"/><rect x="155" y="38" width="22" height="14" fill="#7F77DD"/>
+<rect x="52" y="23" width="22" height="14" fill="#BA7517"/><rect x="75" y="23" width="22" height="14" fill="#D85A30"/><rect x="98" y="23" width="22" height="14" fill="#378ADD"/><rect x="121" y="23" width="22" height="14" fill="#1D9E75"/><rect x="144" y="23" width="22" height="14" fill="#BA7517"/>
+<rect x="190" y="18" width="34" height="34" fill="#E6F1FB"/><rect x="196" y="24" width="22" height="6" fill="#0C447C"/><rect x="204" y="6" width="6" height="12" fill="#A32D2D"/>
+<path d="M20 52 L250 52 L232 74 L36 74 Z" fill="#E24B4A"/><path d="M36 74 L232 74 L228 80 L40 80 Z" fill="#042C53"/>
+<text x="130" y="68" fill="#fff" font-size="10" font-family="monospace" text-anchor="middle">HAYATO MARU</text></svg></div>
+<svg viewBox="0 0 680 18" width="100%" height="18" preserveAspectRatio="none" style="display:block" aria-hidden="true"><path d="M0 8 Q20 0 40 8 T80 8 T120 8 T160 8 T200 8 T240 8 T280 8 T320 8 T360 8 T400 8 T440 8 T480 8 T520 8 T560 8 T600 8 T640 8 T680 8 V18 H0Z" fill="#378ADD"/></svg></div></div>
+  <p class="sub">指示書Excelを読み込むと、航空／海上請求情報登録に貼り付ける文字列を作ります（航空輸出・航空輸入・海上輸出・海上輸入に対応）。端末ではコピーボタン → Ctrl+V で貼り付けてください（Ctrl+V を PasteRelative に割り当てておく）。ファイルはこのブラウザの中だけで処理されます。</p>
+
+  <label class="drop" id="drop">指示書Excel（.xlsx）をクリックで選択、またはドラッグ＆ドロップ<input type="file" id="file" accept=".xlsx,.xlsm"></label>
+  <div class="file" id="fname"></div>
+  <div class="err" id="err"></div>
+
+
+  <div id="out">
+    <div class="box">
+      <div id="mode" style="font-size:18px;font-weight:600;color:#fff;background:var(--acc);border-radius:6px;padding:8px 14px;margin-bottom:12px"></div><h2>読み取った内容（必要なら直せます）</h2>
+      <div class="grid" id="fields"></div>
+      <div id="ninushi" style="margin-top:10px;font-size:13.5px"></div>
+      <div style="margin-top:8px"><input id="nq" placeholder="荷主を検索（例：ひお、日置、HIOKI、5018）" style="width:100%;padding:6px 9px;border:1px solid var(--line);border-radius:4px;font:inherit;font-size:13px"><div class="res" id="nres" style="display:none"></div><div id="nstat" style="font-size:11.5px;color:var(--soft);margin-top:4px"></div></div>
+    </div>
+    <div class="box" style="padding-bottom:10px">
+      <h2><span class="n">0</span>CONTACT（社員番号6桁）</h2>
+      <p class="how">入力すると「上半分」がコピーできるようになります。端末は該当する請求情報登録の空の画面（ENDMARK が X）にしておいてください。</p>
+      <input id="contact" inputmode="numeric" maxlength="6" placeholder="例：025435" style="font-size:18px;width:140px;padding:6px 10px;border:1px solid var(--line);border-radius:4px;letter-spacing:2px">
+    </div>
+    <div id="blocks"></div>
+    <div class="box">
+      <h2>最後の確認</h2>
+      <div class="sum" id="sum"></div>
+      <div class="warn" id="warn"></div>
+      <ol class="final">
+        <li>ENDMARK を X → F にして Enter（計算とエラーチェック）</li>
+        <li>合計・原価合計が上の数字と合っているか確認</li>
+        <li>問題なければ F9 で登録</li>
+      </ol>
+    </div>
+  </div>
+  <div class="box" style="margin-top:18px">
+    <h2>下払い紐づけ</h2>
+    <p class="how">下払いの請求書PDF（セイノー通関・セイノーロジックス・セイノースーパーエクスプレス・後藤回漕店・阪急阪神エクスプレス・DSV）をドロップすると、ポップアップに貼る文字を作ります。1回で3枚までまとめてドロップできます。<br>
+<b>端末の手順</b>：明細の行で F6 → F2 → コピーボタン → <b>Ctrl+V</b>（支払月・支払先・請求書No.が一度に入ります）→ Enter（検索）→ 矢印で請求書の行へ → Enter<br>最後の1枚をコピーすると、3秒後に一番上に戻ります。</p>
+    <label class="drop" id="pdrop" style="padding:16px">下払いの請求書PDFをクリックで選択、またはドラッグ＆ドロップ<input type="file" id="pfile" accept=".pdf" multiple></label>
+    <div id="plist"></div>
+  </div>
+</div>
+
+<script>
+//CORE-START
+var NINUSHI = [];   // ログイン後にSupabaseから読み込む
+var SHIHARAI = [];  // 同上
+
+// 画面ごとの桁位置（貼り付け開始位置を1桁目とした位置）
+var LAYOUT = {
+  AIR: { det: { tax: 46, amt: 48, cost: 60 } },
+  SEA: { det: { tax: 46, amt: 49, cost: 61 } }   // 海上は要位置確認
+};
+var MODES = {
+  AE: { name: "航空輸出", screen: "航空請求情報登録（EX/IM 1）", kind: "AIR" },
+  AI: { name: "航空輸入", screen: "航空請求情報登録（EX/IM 2）", kind: "AIR" },
+  SE: { name: "海上輸出", screen: "海上請求情報登録（EX/IM 1）", kind: "SEA" },
+  SI: { name: "海上輸入", screen: "海上請求情報登録（EX/IM 2）", kind: "SEA" }
+};
+
+function isWide(ch){ var c = ch.charCodeAt(0); if (c < 0x80) return false; if (c >= 0xFF61 && c <= 0xFF9F) return false; return true; }
+function width(s){ var w = 0; for (var i = 0; i < s.length; i++) w += isWide(s[i]) ? 2 : 1; return w; }
+function wideRuns(s){ var r = 0, p = false; for (var i = 0; i < s.length; i++){ var d = isWide(s[i]); if (d && !p) r++; p = d; } return r; }
+function padTo(s, col){ var n = col - width(s); return n > 0 ? s + new Array(n + 1).join(" ") : s; }
+function place(parts){ var s = ""; parts.forEach(function (p){ if (p[1] === "" || p[1] == null) return; s = padTo(s, p[0] - 1) + p[1]; }); return s; }
+function str(v){ return v == null ? "" : (v instanceof Date ? v : String(v).trim()); }
+function roundHalfUp(n){ return Math.sign(n) * Math.round(Math.abs(n)); }
+function num(v){ if (typeof v === "number") return v; var t = String(v == null ? "" : v).replace(/,/g, "").trim(); return t === "" || isNaN(+t) ? null : +t; }
+function cv(ws, a){ var c = ws[a]; return c ? c.v : null; }
+function cs(ws, a){ var v = cv(ws, a); return v == null ? "" : String(v).trim(); }
+function yymmdd(v){
+  var d = null;
+  if (v instanceof Date) d = v;
+  else if (typeof v === "number") d = new Date(Math.round((v - 25569) * 86400000));
+  else { var m = String(v || "").match(/(\d{2,4})\D(\d{1,2})\D(\d{1,2})/); if (m) return m[1].slice(-2) + ("0" + m[2]).slice(-2) + ("0" + m[3]).slice(-2); }
+  if (!d || isNaN(d)) return "";
+  if (d.getUTCHours() >= 12) d = new Date(d.getTime() + 43200000);
+  return String(d.getUTCFullYear()).slice(2) + ("0" + (d.getUTCMonth() + 1)).slice(-2) + ("0" + d.getUTCDate()).slice(-2);
+}
+function fmtNum(v){ var n = num(v); return n == null ? "" : String(+n.toFixed(3)); }
+function store(v){ var m = String(v == null ? "" : v).match(/\d+/); return m ? ("0000" + m[0]).slice(-4) : ""; }
+
+
+// ---------- 日置電機（指示書ツールで作ったExcel）：AEシートは計算結果が保存されていないことが多いので、
+// 入力シートに書いた値と明細マスタから、Excelと同じ計算をして読む。AEシートで金額を手で書き換えた行はその金額を使う ----------
+// ---------- 小さなExcel数式の計算機（日置の指示書は計算結果が保存されていないことがあるため、Excelと同じ計算をする） ----------
+function makeCalc(wb){
+  var memo = {};
+  function colNum(c){ var n = 0; for (var i = 0; i < c.length; i++) n = n * 26 + c.charCodeAt(i) - 64; return n; }
+  function colStr(n){ var s = ""; while (n > 0){ var m = (n - 1) % 26; s = String.fromCharCode(65 + m) + s; n = Math.floor((n - 1) / 26); } return s; }
+  function cell(sheet, a){
+    var key = sheet + "!" + a; if (key in memo) return memo[key];
+    var ws = wb.Sheets[sheet]; if (!ws){ return memo[key] = null; }
+    var c = ws[a]; if (!c){ return memo[key] = null; }
+    memo[key] = c.v == null ? null : c.v;               // 循環参照よけ
+    if (c.f){ try { var r = evalF(c.f, sheet); if (r !== undefined) memo[key] = r; } catch (e){} }
+    return memo[key];
+  }
+  function tok(s){ var t = [], i = 0, m;
+    while (i < s.length){ var r = s.slice(i);
+      if ((m = r.match(/^\s+/))){ i += m[0].length; continue; }
+      if ((m = r.match(/^"((?:[^"]|"")*)"/))){ t.push({ k: "s", v: m[1].replace(/""/g, '"') }); i += m[0].length; continue; }
+      if ((m = r.match(/^(?:'([^']+)'|([^\s!(),:"'+\-*\/&=<>]+))!\$?([A-Z]+)\$?(\d+)(?::\$?([A-Z]+)\$?(\d+))?/))){ t.push({ k: "r", sh: m[1] || m[2], c1: m[3], r1: +m[4], c2: m[5], r2: m[6] ? +m[6] : 0 }); i += m[0].length; continue; }
+      if ((m = r.match(/^\$?([A-Z]{1,3})\$?(\d+)(?::\$?([A-Z]{1,3})\$?(\d+))?(?![A-Za-z(])/))){ t.push({ k: "r", sh: null, c1: m[1], r1: +m[2], c2: m[3], r2: m[4] ? +m[4] : 0 }); i += m[0].length; continue; }
+      if ((m = r.match(/^\d+(\.\d+)?/))){ t.push({ k: "n", v: +m[0] }); i += m[0].length; continue; }
+      if ((m = r.match(/^[A-Z][A-Z0-9_.]*(?=\()/i))){ t.push({ k: "f", v: m[0].toUpperCase().replace(/^_XLFN\./, "") }); i += m[0].length; continue; }
+      if ((m = r.match(/^(<=|>=|<>|[+\-*\/&=<>(),:%^])/))){ t.push({ k: "o", v: m[0] }); i += m[0].length; continue; }
+      if ((m = r.match(/^(TRUE|FALSE)/i))){ t.push({ k: "n", v: /^T/i.test(m[0]) ? 1 : 0 }); i += m[0].length; continue; }
+      throw new Error("tok"); }
+    return t; }
+  function evalF(f, sheet){
+    var t = tok(f), p = 0;
+    function peek(){ return t[p]; } function eat(v){ var x = t[p]; if (v && (!x || x.v !== v)) throw new Error("expect " + v); p++; return x; }
+    function N(v){ return typeof v === "number" ? v : (v instanceof Date ? v.getTime() / 86400000 + 25569 : (v === true ? 1 : (+v || 0))); }
+    function S(v){ return v == null ? "" : String(v); }
+    function cmp(a, b, op){ var x = (typeof a === "string" || typeof b === "string") ? [S(a), S(b)] : [N(a), N(b)];
+      return { "=": x[0] === x[1], "<>": x[0] !== x[1], "<": x[0] < x[1], ">": x[0] > x[1], "<=": x[0] <= x[1], ">=": x[0] >= x[1] }[op]; }
+    function expr(){ var a = cat(); while (peek() && /^(=|<>|<|>|<=|>=)$/.test(peek().v) && peek().k === "o"){ var op = eat().v; a = cmp(a, cat(), op); } return a; }
+    function cat(){ var a = add(); while (peek() && peek().v === "&"){ eat(); a = S(a) + S(add()); } return a; }
+    function add(){ var a = mul(); while (peek() && peek().k === "o" && (peek().v === "+" || peek().v === "-")){ var op = eat().v, b = mul(); a = op === "+" ? N(a) + N(b) : N(a) - N(b); } return a; }
+    function mul(){ var a = una(); while (peek() && peek().k === "o" && (peek().v === "*" || peek().v === "/")){ var op = eat().v, b = una(); if (op === "/" && N(b) === 0) throw new Error("#DIV/0"); a = op === "*" ? N(a) * N(b) : N(a) / N(b); } return a; }
+    function una(){ if (peek() && peek().v === "-"){ eat(); return -N(una()); } if (peek() && peek().v === "+"){ eat(); return una(); } return prim(); }
+    function rng(x){ var sh = x.sh || sheet, out = [], c1 = colNum(x.c1), c2 = x.c2 ? colNum(x.c2) : c1, r2 = x.r2 || x.r1;
+      for (var r = x.r1; r <= r2; r++){ var row = []; for (var c = c1; c <= c2; c++) row.push(cell(sh, colStr(c) + r)); out.push(row); } return out; }
+    function prim(){ var x = eat();
+      if (x.k === "n" || x.k === "s") return x.v;
+      if (x.k === "r"){ if (x.c2){ var R = rng(x); R.isRange = true; return R; } return cell(x.sh || sheet, x.c1 + x.r1); }
+      if (x.k === "o" && x.v === "("){ var v = expr(); eat(")"); return v; }
+      if (x.k === "f") return call(x.v);
+      throw new Error("prim"); }
+    function args(lazy){ eat("("); var a = []; if (peek() && peek().v === ")"){ eat(); return a; }
+      while (true){ if (lazy){ var st = p, depth = 0; while (p < t.length){ var y = t[p]; if (y.v === "(") depth++; else if (y.v === ")"){ if (!depth) break; depth--; } else if (y.v === "," && !depth) break; p++; } a.push([st, p]); }
+        else a.push(expr());
+        if (peek().v === ","){ eat(); continue; } eat(")"); return a; } }
+    function run(seg){ var save = p, end = seg[1]; p = seg[0]; var v = expr(); p = save; return v; }
+    function flat(a){ var o = []; a.forEach(function (v){ if (v && v.isRange) v.forEach(function (r){ r.forEach(function (c){ o.push(c); }); }); else o.push(v); }); return o; }
+    function call(fn){
+      if (fn === "IF" || fn === "IFERROR"){ var L = args(true);
+        if (fn === "IF"){ var c = run(L[0]); return (c && c !== "" && N(c) !== 0 || c === true) ? (L[1] ? run(L[1]) : true) : (L[2] ? run(L[2]) : false); }
+        try { var v = run(L[0]); return v; } catch (e){ return run(L[1]); } }
+      var a = args(false);
+      switch (fn){
+        case "AND": return flat(a).every(function (v){ return v === true || N(v) !== 0; });
+        case "OR": return flat(a).some(function (v){ return v === true || N(v) !== 0; });
+        case "NOT": return !(a[0] === true || N(a[0]) !== 0);
+        case "N": return typeof a[0] === "number" ? a[0] : 0;
+        case "MAX": var f1 = flat(a).filter(function (v){ return typeof v === "number"; }); return f1.length ? Math.max.apply(null, f1) : 0;
+        case "MIN": var f2 = flat(a).filter(function (v){ return typeof v === "number"; }); return f2.length ? Math.min.apply(null, f2) : 0;
+        case "SUM": return flat(a).reduce(function (s, v){ return s + (typeof v === "number" ? v : 0); }, 0);
+        case "COUNT": return flat(a).filter(function (v){ return typeof v === "number"; }).length;
+        case "ROUND": var k = Math.pow(10, N(a[1])); return Math.sign(N(a[0])) * Math.round(Math.abs(N(a[0])) * k + 1e-9) / k;
+        case "ROUNDUP": var k2 = Math.pow(10, N(a[1])); return Math.sign(N(a[0])) * Math.ceil(Math.abs(N(a[0])) * k2 - 1e-9) / k2;
+        case "ROUNDDOWN": var k3 = Math.pow(10, N(a[1])); return Math.sign(N(a[0])) * Math.floor(Math.abs(N(a[0])) * k3 + 1e-9) / k3;
+        case "CEILING": return Math.ceil(N(a[0]) / N(a[1] || 1) - 1e-9) * N(a[1] || 1);
+        case "TRIM": return S(a[0]).trim().replace(/\s+/g, " ");
+        case "MID": return S(a[0]).substr(N(a[1]) - 1, N(a[2]));
+        case "LEFT": return S(a[0]).slice(0, a.length > 1 ? N(a[1]) : 1);
+        case "RIGHT": var s = S(a[0]); return s.slice(s.length - (a.length > 1 ? N(a[1]) : 1));
+        case "LEN": return S(a[0]).length;
+        case "FIND": var ix = S(a[1]).indexOf(S(a[0]), (a[2] ? N(a[2]) : 1) - 1); if (ix < 0) throw new Error("#VALUE"); return ix + 1;
+        case "UPPER": return S(a[0]).toUpperCase();
+        case "VALUE": return N(a[0]);
+        case "TEXT": var nv = N(a[0]), fmt = S(a[1]); if (/#,##0/.test(fmt)) return Math.round(nv).toLocaleString("en-US"); return S(a[0]);
+        case "VLOOKUP": var tbl = a[1], col = N(a[2]) - 1;
+          for (var i = 0; i < tbl.length; i++){ var key = tbl[i][0]; if (key != null && S(key).trim() === S(a[0]).trim()) return tbl[i][col]; }
+          throw new Error("#N/A");
+        default: throw new Error("fn " + fn);
+      } }
+    var r = expr(); return r;
+  }
+  return { cell: cell };
+}
+
+// ---------- 日置電機（指示書ツールで作ったExcel）：Excelを開いたときと同じ計算をして、AEシートに表示される明細を読む ----------
+function readHioki(wb){
+  var X = makeCalc(wb), I = wb.Sheets["入力"], MS = wb.Sheets["明細マスタ"], CA = wb.Sheets["CA1P"], AE = wb.Sheets["AE"];
+  function lab(t){ for (var a in I){ if (a[0] === "!") continue; var v = I[a] && I[a].v;
+    if (typeof v === "string" && v.trim().indexOf(t) === 0){ var m = a.match(/^([A-Z]+)(\d+)$/);
+      if (m && m[1] === "B") return X.cell("入力", "C" + m[2]); if (m && m[1] === "F") return X.cell("入力", "G" + m[2]); } } return null; }
+  var inv1 = String(X.cell("入力", "C7") || "").trim(), invs = [inv1];
+  ["G7", "G8", "G9", "G10", "G11", "G12", "G13"].forEach(function (a){ var v = String(X.cell("入力", a) || "").trim(); if (v) invs.push(v); });
+  var code = String(X.cell("入力", "C8") || "").trim();
+  var W = num(lab("重量")) || 0, P = num(lab("個数")) || 0;
+  var acc = String(lab("請求先") || "").replace(/\s/g, ""), am = acc.match(/^(\d{6})-?(\d{3})?$/);
+  var mawb = String(lab("MAWB") || "").replace(/\D/g, "");
+  var dest = String(X.cell("入力", "C10") || ""), cnee = String(X.cell("入力", "C25") || "");
+  if (/未登録/.test(dest)) dest = ""; if (/未登録/.test(cnee)) cnee = "";
+  var h = { acc1: am ? am[1] : acc.slice(0, 6), acc2: am && am[2] ? am[2] : "000",
+    mawb1: mawb.slice(0, 3), mawb2: mawb.slice(3), hawb: String(lab("HAWB") || "").replace(/[\s-]/g, ""),
+    dept: "NRT", dest: dest, flight: str(lab("Flight")), goods: str(lab("品名")),
+    shpr: "HIOKI E.E. CORPORATION", cnee: cnee,
+    shinkoku: str(lab("輸出許可番号")), kyokabi: yymmdd(lab("輸出許可日")),
+    pcs: fmtNum(P), aw: fmtNum(W), m3: fmtNum(lab("容積")), cw: fmtNum(W),
+    rmks: inv1 ? "INVOICE NO:" + invs.join(",").replace(/\s/g, "") : "",
+    tori: store(lab("取上店")), kaishu: store(lab("取上店")) };
+  function taxOf(cd){ if (!CA) return ""; for (var r = 2; r < 300; r++){ if (num(cv(CA, "B" + r)) === cd) return num(cv(CA, "K" + r)) === 1 ? "Y" : ""; } return ""; }
+  var lines = [], warn = [];
+  for (var r2 = 3; r2 < 60; r2++){ var cd = num(X.cell("明細マスタ", "C" + r2)); if (!cd) continue;
+    var on = X.cell("明細マスタ", "B" + r2); if (!(on === true || num(on) === 1)) continue;
+    lines.push({ code: String(cd === 101 ? 218 : cd), item: String(X.cell("明細マスタ", "D" + r2) || "").trim(), tax: taxOf(cd),
+      amt: roundHalfUp(num(X.cell("明細マスタ", "E" + r2)) || 0), cost: roundHalfUp(num(X.cell("明細マスタ", "F" + r2)) || 0) }); }
+  // AEシートで金額を手で書き換えた（数式ではなく数字が入っている）行は、その金額を使う
+  if (AE) lines.forEach(function (l, i){ var row = 30 + i; ["P", "Y"].forEach(function (col){ var c = AE[col + row];
+    if (c && !c.f && num(c.v) != null) l[col === "P" ? "amt" : "cost"] = roundHalfUp(num(c.v)); }); });
+  lines = lines.filter(function (l){ return l.amt || l.cost; });
+  if (!dest) warn.push("INVOICEコード「" + code + "」が仕向け地マスタにありません。DESTを確認してください。");
+  return { mode: "AE", hioki: true, h: h, lines: lines, warn: warn };
+}
+function caName(wb, code){ var CA = wb.Sheets["CA1P"]; if (!CA) return ""; for (var r = 2; r < 300; r++) if (num(cv(CA, "B" + r)) === code) return cs(CA, "C" + r); return ""; }
+function readShijisho(wb){
+  if (wb.Sheets["入力"] && wb.Sheets["明細マスタ"]) return readHioki(wb);
+  if (wb.Sheets["入力"] && /入力シート/.test(cs(wb.Sheets["入力"], "A1"))) return readStandard(wb);
+  var ws = null;
+  wb.SheetNames.forEach(function (n){ if (!ws && /請求書作成指示書/.test(cs(wb.Sheets[n], "D3"))) ws = wb.Sheets[n]; });
+  if (!ws) throw new Error("指示書のシートが見つかりません（D3に「請求書作成指示書」がありません）。");
+  var title = cs(ws, "D3").replace(/[\s　－\-]/g, "");
+  var mode = /航空輸出/.test(title) ? "AE" : /航空輸入/.test(title) ? "AI" : /海上輸出/.test(title) ? "SE" : /海上輸入/.test(title) ? "SI" : null;
+  if (!mode) throw new Error("指示書の種類（航空/海上・輸出/輸入）が判定できません：" + title);
+  var M = MODES[mode], hioki = /日置/.test(cs(ws, "D3")), codeMap = hioki ? { "101": "218" } : {};
+  var rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: null, raw: true });
+  function T(v){ return v == null ? "" : (v instanceof Date ? v : String(v).trim()); }
+  function txt(r, c){ return String(T((rows[r] || [])[c])); }
+  // ラベル（見出し）の位置を探す。行がずれた指示書でも読めるように、決まったセルではなく見出しから探す
+  function find(re, r0, r1){ for (var r = r0 || 0; r < Math.min(rows.length, r1 || 60); r++){ var row = rows[r] || [];
+    for (var c = 0; c < row.length; c++){ var v = row[c]; if (typeof v === "string" && re.test(v.replace(/[\s　]/g, ""))) return { r: r, c: c }; } } return null; }
+  function right(p, maxC){ if (!p) return null; var row = rows[p.r] || [];
+    for (var c = p.c + 1; c < Math.min(row.length, maxC || 99); c++){ var v = row[c]; if (v != null && String(v).trim() !== "" && !/^[（）()：:]$/.test(String(v).trim())) return v; } return null; }
+  function below(p){ if (!p) return null; var v = (rows[p.r + 1] || [])[p.c]; return v == null || String(v).trim() === "" ? null : v; }
+  var hdr = find(/^請求項目$/), lastHead = hdr ? hdr.r : 40;
+  var pcsL = find(/^PCS$/, 10, lastHead), awL = find(/^A\/W$/, 10, lastHead) || find(/^C\/W$/, 10, lastHead), m3L = find(/^M3$/, 10, lastHead), gdL = find(/^品名$/, 10, lastHead);
+  var cneeL = find(/^輸入者名称/, 10, lastHead), shpL = find(/^SHIPPER/i, 10, lastHead);
+  var acc = String(T(right(find(/^請求先/, 0, 15)))).replace(/\s/g, ""), am = acc.match(/^(\d{6})-?(\d{3})?$/);
+  var mawbV = String(T(right(find(/^MAWBNo/i, 8, 20), 16))), hawbV = String(T(right(find(/^HAWBNo/i, 8, 20), 16)));
+  var fromV = T(below(find(/^FROM$/i, 8, 20))), toV = T(below(find(/^TO/i, 8, 20)));
+  var vesV = T(right(find(/^(Vessel|Flight)/i, 8, 20))), etdV = right(find(/^(EAT|ETA|ETD)/i, 8, 20));
+  // 許可番号・許可日：「許可番号」「申告番号」「許可日」の見出しの右、または「許可番号：〇〇」と書かれた文字
+  var permitNo = "", permitDate = null;
+  var pn = find(/(許可番号|申告番号)$/, 0, lastHead), pd = find(/許可日$/, 0, lastHead);
+  if (pn) permitNo = String(T(right(pn)));
+  if (pd) permitDate = right(pd);
+  rows.slice(0, lastHead).forEach(function (row){ (row || []).forEach(function (v){ var m; if (typeof v !== "string") return;
+    if ((m = v.match(/(許可番号|申告番号)\s*[:：]\s*(.+)/))) permitNo = m[2].trim();
+    if ((m = v.match(/許可日\s*[:：]\s*(.+)/))) permitDate = m[1].trim(); }); });
+  // 輸入者名称・SHIPPER：見出しの下〜PCS見出しの手前で、許可番号などの書き込みでない文字
+  function nameNear(L, cFrom, cTo){ if (!L) return "";
+    var v = right(L, cTo); if (v != null && typeof v === "string" && !/許可|申告/.test(v)) return v.trim();
+    var end = pcsL ? pcsL.r : L.r + 3;
+    for (var r = L.r + 1; r < end; r++) for (var c = cFrom; c < cTo; c++){ var t = txt(r, c); if (t && isNaN(+t) && !/許可|申告|SHIPPER|輸入者/.test(t)) return t; }
+    return ""; }
+  var cnee = nameNear(cneeL, 3, shpL ? shpL.c : 20), shpr = nameNear(shpL, shpL ? shpL.c : 20, 45);
+  var memoInv = ""; rows.forEach(function (row){ (row || []).forEach(function (v){ if (!memoInv && typeof v === "string" && /^INVOICE\s*[：:]/i.test(v.trim())) memoInv = v.trim().replace(/^INVOICE\s*[：:]\s*/i, ""); }); });
+  var h = {
+    acc1: am ? am[1] : acc.slice(0, 6), acc2: am && am[2] ? am[2] : "000",
+    dept: String(fromV), dest: String(toV),
+    pcs: fmtNum(below(pcsL)), aw: fmtNum(below(awL)), m3: fmtNum(below(m3L)), goods: String(T(below(gdL))),
+    shinkoku: permitNo, kyokabi: permitDate ? yymmdd(permitDate) : "",
+    rmks: memoInv ? "INVOICE NO:" + memoInv.replace(/[、，]/g, ",").replace(/\s/g, "") : "",
+    tori: store(right(find(/^取上店/, 40, 80))), kaishu: store(right(find(/^回収店/, 40, 80)))
+  };
+  if (!h.kaishu) h.kaishu = h.tori;
+  if (M.kind === "AIR"){
+    var mw = mawbV.replace(/\D/g, ""); h.mawb1 = mw.slice(0, 3); h.mawb2 = mw.slice(3); h.hawb = hawbV.replace(/[\s-]/g, "");
+    h.flight = String(vesV); h.shpr = shpr; h.cnee = cnee; h.cw = h.aw;
+  } else {
+    h.bl = hawbV || mawbV; h.vesl = String(vesV); h.etd = yymmdd(etdV); h.party = cnee; h.pkg = "";
+  }
+
+  // 明細
+  if (!hdr) throw new Error("「請求項目」の見出しが見つかりません。");
+  var col = {};
+  (rows[hdr.r] || []).forEach(function (v, i){ if (typeof v !== "string") return; var t = v.replace(/\s|　/g, "");
+    if (t === "請求項目") col.item = i; else if (t === "コード") col.code = i; else if (t === "消費税") col.tax = i; else if (t === "対荷主様") col.amt = i; else if (t === "原価") col.cost = i; });
+  var lines = [];
+  for (var r2 = hdr.r + 1; r2 < rows.length; r2++){ var rw = rows[r2] || [];
+    var code = num(rw[col.code]), amt = num(rw[col.amt]), cost = num(rw[col.cost]);
+    if (!code || (!amt && !cost)) continue;   // 金額が書いていない（空・0）行は無視
+    var c = String(code);
+    lines.push({ code: codeMap[c] || c, item: String(rw[col.item] || "").trim() || caName(wb, code), tax: num(rw[col.tax]) === 1 ? "Y" : "",
+      amt: amt == null ? "" : roundHalfUp(amt), cost: cost == null ? "" : roundHalfUp(cost) });
+  }
+  return { mode: mode, hioki: hioki, h: h, lines: lines };
+}
+
+// ---------- 新しい入力シート（入力シート付き指示書）：入力欄の値だけを読む ----------
+function readStandard(wb){
+  var I = wb.Sheets["入力"], CA = wb.Sheets["CA1P"], v = {}, hdrRow = null;
+  for (var r = 1; r < 80; r++){ var b = cs(I, "B" + r); if (b) v[b] = cv(I, "C" + r); if (b === "No" && cs(I, "C" + r) === "CODE") { hdrRow = r; break; } }
+  function g(label){ for (var k in v) if (k.indexOf(label) === 0) return v[k]; return null; }
+  var mode = String(g("種別") || "").trim().toUpperCase();
+  if (!MODES[mode]) throw new Error("入力シートの「種別」が AE/AI/SE/SI ではありません。");
+  var M = MODES[mode];
+  var acc = String(g("ACC NO") || "").replace(/\s/g, ""), am = acc.match(/^(\d{6})-?(\d{3})?$/);
+  var h = { acc1: am ? am[1] : acc.slice(0, 6), acc2: am && am[2] ? am[2] : "000",
+    dept: str(g("DEPT")), dest: str(g("DEST")), pcs: fmtNum(g("PCS")), aw: fmtNum(g("A/W")), m3: fmtNum(g("M3")),
+    goods: str(g("GOODS")), shinkoku: str(g("シンコク")), kyokabi: yymmdd(g("ｷｮｶﾋﾞ")),
+    rmks: str(g("RMKS")), tori: store(g("取上店")), kaishu: store(g("回収店")) || store(g("取上店")) };
+  if (M.kind === "SEA"){ h.bl = str(g("B/L NO")); h.vesl = str(g("VESL")); h.etd = yymmdd(g("ETD/ETA")); h.party = str(g("SHPR/CNEE")); h.pkg = str(g("PKG TYPE")); }
+  else { var mw = String(g("MAWB") || "").replace(/\D/g, ""); h.mawb1 = mw.slice(0, 3); h.mawb2 = mw.slice(3); h.hawb = String(g("HAWB") || "").replace(/[\s-]/g, ""); h.flight = str(g("FLIGHT"));
+    h.shpr = str(g("SHPR")); h.cnee = str(g("CNEE")); h.cw = fmtNum(g("C/W")) || h.aw; }
+  function ca(code, col){ if (!CA) return null; for (var r = 2; r < 300; r++) if (num(cv(CA, "B" + r)) === code) return cv(CA, col + r); return null; }
+  var lines = [];
+  if (hdrRow) for (var r2 = hdrRow + 1; r2 < hdrRow + 60; r2++){
+    if (cs(I, "D" + r2) === "合計") break;
+    var code = num(cv(I, "C" + r2)); if (!code) continue;
+    var amt = num(cv(I, "G" + r2)), cost = num(cv(I, "H" + r2)); if (!amt && !cost) continue;
+    var tx = ca(code, "K"); var taxY = tx != null ? num(tx) === 1 : cs(I, "F" + r2) === "Y";
+    lines.push({ code: String(code), item: cs(I, "D" + r2) || String(ca(code, "C") || ""), tax: taxY ? "Y" : "",
+      amt: amt == null ? "" : roundHalfUp(amt), cost: cost == null ? "" : roundHalfUp(cost) });
+  }
+  return { mode: mode, std: true, h: h, lines: lines };
+}
+
+
+// 欄の長さを超えると次の欄にはみ出すので、必ず欄の長さで切る（全角は2桁、全角のかたまりごとに前後+2桁）
+function fit(s, n){ s = String(s == null ? "" : s); var out = "";
+  for (var i = 0; i < s.length; i++){ var t = out + s[i]; if (width(t) + 2 * wideRuns(t) > n) break; out = t; } return out.replace(/\s+$/, ""); }
+var LEN = {
+  AIR: { contact: 6, acc1: 6, acc2: 3, mawb1: 3, mawb2: 8, dept: 3, dest: 3, flight: 11, goods: 30, name: 35, shinkoku: 15, kyokabi: 8, pcs: 6, aw: 9, m3: 10, cw: 9, store: 4 },
+  SEA: { contact: 6, acc1: 6, acc2: 3, bl: 20, dept: 3, dest: 3, vesl: 26, etd: 8, name: 35, party: 35, pcs: 7, pkg: 3, aw: 9, m3: 10, goods: 42, shinkoku: 15, kyokabi: 8, store: 4 },
+  item: 38
+};
+
+// ---------- 海上画面：空白＝カーソル移動、入力できない位置の文字は次の欄へ、欄が埋まると次の欄の手前へ自動移動 ----------
+var SEA_ROWS = [
+  [["contact", 1, 6], ["cname", 8, 16]],
+  [["acc1", 1, 6], ["acc2", 8, 3], ["accname", 12, 35]],
+  [["bl", 1, 20], ["dept", 33, 3], ["dest", 45, 3]],
+  [["vesl", 1, 26], ["etd", 45, 8]],
+  [["c1", 1, 6], ["c2", 8, 3], ["party", 12, 35]],
+  [["pcs", 1, 7], ["pkg", 20, 3], ["aw", 34, 9], ["m3", 52, 10]],
+  // ｷｮｶﾋﾞは次の行だが、シンコクの後ろの入力できない位置で打つと「次の欄」＝ｷｮｶﾋﾞに入るので、同じ行に続けて打つ
+  [["goods", 1, 42], ["shinkoku", 52, 15], ["kyokabi", 69, 8]]
+];
+function rhe(x){ var f = Math.floor(x), r = x - f; return r > 0.5 ? f + 1 : r < 0.5 ? f : (f % 2 === 0 ? f : f + 1); }
+function seaHeader(v){
+  var lines = [], line = null, c = 1, wrapped = false;
+  SEA_ROWS.forEach(function (row){
+    if (!wrapped){ if (line !== null) lines.push(line.trim() ? line : " "); line = ""; c = 1; }
+    wrapped = false; var prevEnd = 0;
+    row.forEach(function (f, i){
+      var val = fit(v[f[0]], f[2]), s = f[1], n = f[2];
+      if (val){
+        var t = s > 1 ? Math.max(c, rhe((prevEnd + 1 + s) / 2)) : Math.max(c, 1);
+        line += new Array(t - c + 1).join(" ") + val;
+        if (width(val) === n){ if (i + 1 < row.length) c = row[i + 1][1] - 1; else { c = 0; wrapped = true; } }
+        else c = s + width(val);
+      }
+      prevEnd = s + n - 1;
+    });
+  });
+  lines.push(line);
+  while (lines.length && !lines[lines.length - 1].trim()) lines.pop();
+  return lines;
+}
+function seaDetail(l){
+  var item = fit(l.item, LEN.item), pad = function (s, n, k){ return s + new Array(Math.max(0, n - width(s) - (k || 0)) + 1).join(" "); };
+  return l.code + pad(item, 38, 2 * wideRuns(item)) + pad(String(l.amt), 10) + pad(String(l.cost), 10);
+}
+function rmksLines(t){
+  var out = [""]; String(t || "").split(",").forEach(function (p, i){ var piece = (i ? "," : "") + p, cur = out[out.length - 1];
+    if (width(cur + piece) <= 42) out[out.length - 1] = cur + piece; else out.push(piece.replace(/^,/, "")); });
+  return out;
+}
+
+function detailLine(l, L){
+  var item = fit(l.item, LEN.item), k = 2 * wideRuns(item);
+  var s = padTo(l.code + "  " + item, L.tax - 1 - k) + " ";   // 課税のYは端末が自動で入れる
+  s = padTo(s, L.amt - 1 - k) + l.amt;
+  return padTo(s, L.cost - 1 - k) + l.cost;
+}
+function normH(h){ var o = {}; for (var k in h){ var v = h[k] == null ? "" : String(h[k]).trim();
+    if ((k === "kyokabi" || k === "etd") && /\D/.test(v)) v = yymmdd(v);
+    if ((k === "pcs" || k === "aw" || k === "m3" || k === "cw") && v) v = v.replace(/,/g, "");
+    if (k === "pkg"){ var fp = fixPkg(v); if (fp) v = fp.code; }
+    if (k !== "rmks" && /[^\x20-\x7E]/.test(v)) v = "";   // 上の部分は漢字・かなが入らないので、英数字以外は使わない
+    o[k] = v; } return o; }
+function buildBlocks(d){
+  var h = normH(d.h), M = MODES[d.mode], B = [], head;
+  if (M.kind === "AIR"){
+    var A = LEN.AIR, f = function (k, n){ return fit(h[k], n || A[k]); };
+    head = [
+      place([[1, f("acc1")], [8, f("acc2")]]),
+      place([[1, f("mawb1")], [5, f("mawb2")], [24, fit((h.hawb || "").slice(0, 3), 3)], [28, fit((h.hawb || "").slice(3), 9)], [47, f("dept")], [59, f("dest")]]),
+      place([[1, f("flight")], [24, f("goods")]]),
+      place([[13, f("shpr", A.name)], [56, f("shinkoku")]]),
+      place([[13, f("cnee", A.name)], [56, f("kyokabi")]]),
+      place([[1, f("pcs")], [14, f("aw")], [45, f("m3")], [62, f("cw")]])
+    ];
+  }
+  // 空の行は他の欄を消してしまうので、最後の空行は落とし、途中の空行は1文字の空白で埋めない（そのまま残すと危険）
+  var lock = !/^\d{6}$/.test(d.contact || "");
+  if (M.kind === "AIR"){
+    head.unshift(fit(d.contact, 6));
+    while (head.length && !head[head.length - 1]) head.pop();
+    head = head.map(function (s){ return s || " "; });
+  } else {
+    var sv = {}; for (var k in h) sv[k] = h[k]; sv.contact = d.contact;
+    head = seaHeader(sv);
+  }
+  // 途中に空の行があると端末側で行が詰まり、下の行が1行上の欄に入ってしまう（例：PCSがSHPR/CNEEに入る）ので、コピーさせない
+  var lockMsg = lock ? "先に CONTACT（社員番号6桁）を入力してください。" : "";
+  if (!lockMsg){ var names = M.kind === "AIR" ? ["ACC NO", "MAWB/DEPT/DEST", "FLIGHT/GOODS", "SHPR/シンコク", "CNEE/ｷｮｶﾋﾞ", "PCS/A/W/M3/C/W"] : null;
+    var emptyAt = []; for (var i = 1; i < head.length - 1; i++) if (!head[i].trim()) emptyAt.push(i);
+    if (M.kind === "SEA"){ var seaNames = ["ACC NO", "B/L・DEPT・DEST", "VESL・ETD/ETA", "SHPR/CNEE", "PCS・A/W・M3", "GOODS・シンコク"];
+      emptyAt = []; var hv = {}; for (var k2 in h) hv[k2] = h[k2];
+      [["acc1"], ["bl", "dept", "dest"], ["vesl", "etd"], ["party"], ["pcs", "pkg", "aw", "m3"], ["goods", "shinkoku"]].forEach(function (g, i){ if (!g.some(function (k){ return hv[k]; })) emptyAt.push(i); });
+      if (emptyAt.length) lockMsg = "上の「読み取った内容」で " + emptyAt.map(function (i){ return seaNames[i]; }).join("、") + " を入力してください（1行まるごと空だと、下の行がずれて入ってしまいます）。"; }
+    else if (emptyAt.length) lockMsg = "上の「読み取った内容」で " + emptyAt.map(function (i){ return names[i - 1] || ""; }).join("、") + " を入力してください（1行まるごと空だと、下の行がずれて入ってしまいます）。"; }
+  // どの欄に何が入るかの一覧（コピー前の確認用）
+  var F2 = function (k, n){ return fit(h[k], n || LEN[M.kind][k] || LEN[M.kind].name); };
+  var pv = M.kind === "AIR" ? [
+    [["CONTACT", fit(d.contact, 6)], ["ACC NO", F2("acc1") + " " + F2("acc2")]],
+    [["MAWB", F2("mawb1") + " " + F2("mawb2")], ["HAWB", fit((h.hawb || "").slice(0, 3), 3) + " " + fit((h.hawb || "").slice(3), 9)], ["DEPT", F2("dept")], ["DEST", F2("dest")]],
+    [["FLIGHT", F2("flight")], ["GOODS", F2("goods")]],
+    [["SHPR", F2("shpr")], ["シンコク", F2("shinkoku")]],
+    [["CNEE", F2("cnee")], ["ｷｮｶﾋﾞ", F2("kyokabi")]],
+    [["PCS", F2("pcs")], ["A/W", F2("aw")], ["M3", F2("m3")], ["C/W", F2("cw")]]
+  ] : [
+    [["CONTACT", fit(d.contact, 6)], ["ACC NO", F2("acc1") + " " + F2("acc2")]],
+    [["B/L NO", F2("bl")], ["DEPT", F2("dept")], ["DEST", F2("dest")]],
+    [["VESL", F2("vesl")], ["ETD/ETA", F2("etd")]],
+    [["SHPR/CNEE", F2("party")]],
+    [["PCS", F2("pcs")], ["PKG TYPE", F2("pkg")], ["A/W", F2("aw")], ["M3", F2("m3")]],
+    [["GOODS", F2("goods")], ["シンコク", F2("shinkoku")], ["ｷｮｶﾋﾞ", F2("kyokabi")]]
+  ];
+  B.push({ t: "上半分", how: "CONTACT 欄の先頭にカーソルを置いて貼り付け", lock: !!lockMsg, lockMsg: lockMsg, preview: pv, text: head.join("\r\n") });
+  if (h.rmks) B.push({ t: "RMKS", how: "F2 でリマーク欄を開き、1行目の先頭で貼り付け → F6 で閉じる", text: rmksLines(h.rmks).slice(0, 4).join("\r\n") });
+  var L = LAYOUT[M.kind].det;
+  for (var p = 0; p * 5 < d.lines.length; p++){
+    B.push({ t: "明細 " + (p + 1) + "ページ目", how: (p ? "PgDn で " + (p + 1) + "ページ目に移り、明細1行目の CODE 欄にカーソルを置いて貼り付け" : (M.kind === "SEA" ? "上半分を貼ったら Tab を1回押す（CODE 欄に移る）→ そのまま貼り付け" : "明細1行目の CODE 欄にカーソルを置いて貼り付け")),
+      text: M.kind === "AIR" ? d.lines.slice(p * 5, p * 5 + 5).map(function (l){ return detailLine(l, L); }).join("\r\n")
+                             : d.lines.slice(p * 5, p * 5 + 5).map(seaDetail).join("").replace(/\s+$/, "") });
+  }
+  B.push({ t: "取上店・回収店", how: "取上店の欄にカーソルを置いて貼り付け（売上先は自動で入ります）", text: place([[1, fit(h.tori, 4)], [16, fit(h.kaishu, 4)]]) });
+  return B;
+}
+function checks(d){
+  var w = (d.warn || []).slice();
+  d.lines.forEach(function (l){ if (fit(l.item, LEN.item) !== l.item.replace(/\s+$/, "")) w.push("請求項目「" + l.item + "」は長いので「" + fit(l.item, LEN.item) + "」で切っています。"); });
+  if (rmksLines(d.h.rmks).length > 4) w.push("RMKS が4行（1行42文字）に入りきりません。5行目以降は入りません。");
+
+  var fpk = fixPkg(d.h.pkg); if (fpk) w.push(fpk.note);
+  var Ln = LEN[MODES[d.mode].kind];
+  ["goods", "shpr", "cnee", "party", "vesl", "bl", "flight"].forEach(function (k){ var n = Ln[k] || Ln.name; if (d.h[k] && n && fit(d.h[k], n) !== d.h[k]) w.push((LABELS[k] || k) + " は長いので「" + fit(d.h[k], n) + "」で切っています。"); });
+  if (d.h.hawb && d.h.hawb.length > 12) w.push("HAWB が12文字を超えているので、13文字目以降は入りません。");
+  Object.keys(d.h).forEach(function (k){ if (k !== "rmks" && /[^\x20-\x7E]/.test(String(d.h[k] || ""))) w.push((LABELS[k] || k) + "「" + d.h[k] + "」は漢字・かなが入っているので使っていません。英字で入力してください。"); });
+  var need = MODES[d.mode].kind === "AIR" ? ["acc1", "mawb2", "dest", "flight", "pcs", "aw", "cw", "tori"] : ["acc1", "bl", "pcs", "tori"];
+  need.forEach(function (k){ if (!d.h[k]) w.push((LABELS[k] || k) + " が空です。"); });
+  return w;
+}
+var LABELS = { acc1: "ACC NO", acc2: "ACC NO（枝番）", mawb1: "MAWB（頭3桁）", mawb2: "MAWB（8桁）", hawb: "HAWB", bl: "B/L NO", dept: "DEPT", dest: "DEST",
+  flight: "FLIGHT", vesl: "VESL", etd: "ETD/ETA（yymmdd）", goods: "GOODS", shpr: "SHPR", cnee: "CNEE", party: "SHPR/CNEE", pkg: "PKG TYPE",
+  shinkoku: "シンコク（許可番号）", kyokabi: "ｷｮｶﾋﾞ（yymmdd）", pcs: "PCS", aw: "A/W", m3: "M3", cw: "C/W", rmks: "RMKS", tori: "取上店", kaishu: "回収店" };
+
+// ---------- 下払い：請求書PDFの読み取り ----------
+function supName(no){ for (var i = 0; i < SHIHARAI.length; i++) if (SHIHARAI[i][0] === String(no)) return SHIHARAI[i][1]; return ""; }
+var MON = { JAN: 1, FEB: 2, MAR: 3, APR: 4, MAY: 5, JUN: 6, JUL: 7, AUG: 8, SEP: 9, OCT: 10, NOV: 11, DEC: 12 };
+function parseDate(s){ var m;
+  if ((m = s.match(/(\d{4})[\/\-.](\d{1,2})[\/\-.](\d{1,2})/))) return [+m[1], +m[2]];
+  if ((m = s.match(/(\d{1,2})-([A-Za-z]{3})-(\d{2,4})/))) return [m[3].length === 2 ? 2000 + +m[3] : +m[3], MON[m[2].toUpperCase()]];
+  return null; }
+function nextMonth(ym){ if (!ym) return ""; var y = ym[0], mo = ym[1] + 1; if (mo > 12){ mo = 1; y++; } return y + ("0" + mo).slice(-2); }
+function readShitabarai(text, fname){
+  var t = text.normalize("NFKC").replace(/\s+/g, " "), z = t.replace(/ /g, ""), fn = fname || "", r = { sup: "", no: "", month: "", note: "" }, m, d = null;
+  var bpat = /B\d{3}[A-Z]{2}\d{8}-D\d{2}/, spat = /S0\d{11}/;
+  function after(label, re){ var i = z.indexOf(label); if (i < 0) return null; var mm = z.slice(i + label.length, i + label.length + 60).match(re); return mm ? mm[1] || mm[0] : null; }
+  if (/SEINOLOGIX|セイノーロジックス|T7200001015755/i.test(z)){
+    r.sup = "2"; m = t.match(/請求書\s+([A-Z]{2}\d{6,}(?:\/[A-Z0-9]+)?)/) || z.match(/請求書([A-Z]{2}\d{6,}(?:\/[A-Z0-9]+)?)/); if (m) r.no = m[1];
+    m = t.match(/INVOICE DATE\s+(\S+)/); if (m) d = parseDate(m[1]);
+  } else if (/後藤回漕店/.test(z) || (bpat.test(z) && !/阪急阪神|DSV/i.test(z))){
+    r.sup = "5"; m = z.match(bpat); if (m) r.no = m[0]; d = parseDate(after("発行日", /\d{4}\/\d{1,2}\/\d{1,2}/) || "");
+  } else if (/T6010001080324|セイノー通関|SEINOCUSTOMS/i.test(z) || spat.test(z) || /^\d+-\d+_\d{8}_S0\d{11}/.test(fn.replace(/^[0-9a-f]{8}-/, ""))){
+    r.sup = "1"; m = z.match(spat) || fn.match(spat); if (m) r.no = m[0];
+    m = fn.match(/_(\d{4})(\d{2})(\d{2})_S0\d{11}/); d = m ? [+m[1], +m[2]] : parseDate(after("請求日", /\d{4}\/\d{1,2}\/\d{1,2}/) || "");
+  } else if (/セイノースーパーエクスプレス|ｾｲﾉｰｽｰﾊﾟｰ/.test(z) || /輸入請求書\(海上貨物\)|輸出請求書/.test(z)){
+    r.sup = "3"; r.no = after("請求書番号", /:?([A-Z0-9\-]+)/) || ""; d = parseDate(after("請求日", /\d{4}\/\d{1,2}\/\d{1,2}/) || "");
+  } else if (/阪急阪神|hh-express/i.test(z)){
+    r.sup = "7"; m = t.match(/請求書\s*INVOICE\s+([0-9A-Z]+)/); if (m) r.no = m[1];
+    m = t.match(/INVOICE DATE\s+(\S+)/); if (m) d = parseDate(m[1]);
+  } else if (/DSV/i.test(z)){
+    r.sup = "127"; m = t.match(/INVOICE\s+(JP\d+)/); if (m) r.no = m[1];
+    m = t.match(/INVOICE DATE\s+(\S+)/); if (m) d = parseDate(m[1]);
+  }
+  if (!z){ var fz = fn.normalize("NFKC");
+    var fsup = /セイノー通関|西濃通関/.test(fz) ? "1" : /ロジックス|LOGIX/i.test(fz) ? "2" : /スーパーエクスプレス|SSX/i.test(fz) ? "3" : /後藤/.test(fz) ? "5" : /阪急|HHE/i.test(fz) ? "7" : /DSV/i.test(fz) ? "127" : "";
+    if (fsup && !(fn.match(bpat) || fn.match(spat))){ r.sup = fsup; r.note = "スキャン画像のPDFなので、ファイル名から支払先を判定しました。請求書No.と支払月を入力してください。"; }
+    m = fn.match(bpat) || fn.match(spat);
+    if (m){ r.no = m[0]; r.sup = m[0][0] === "B" ? "5" : "1"; r.note = "スキャン画像のPDFなので、ファイル名から請求書番号を拾いました。支払先と支払月を確認してください。";
+      var fd = fn.match(/_(\d{4})(\d{2})(\d{2})_S0\d{11}/); if (fd) d = [+fd[1], +fd[2]]; }
+    else if (!r.sup) r.note = "スキャン画像のPDFで文字が読めません。手で入力してください。"; }
+  else if (!r.sup) r.note = "支払先が判定できませんでした。手で入力してください。";
+  // ラベルと値が離れて読めるPDFでは、請求書番号のすぐ後ろの最初の日付が発行日（請求日）
+  if (!d && r.no && z.indexOf(r.no) >= 0){ var md = z.slice(z.indexOf(r.no) + r.no.length, z.indexOf(r.no) + r.no.length + 90).match(/\d{4}\/\d{1,2}\/\d{1,2}/); if (md) d = parseDate(md[0]); }
+  r.month = nextMonth(d);
+  if (r.sup && !r.no && !r.note) r.note = "請求書番号が読めませんでした。入力してください。";
+  if (r.sup && !r.month && !r.note) r.note = "請求日が読めなかったので、支払月を入力してください。";
+  return r;
+}
+// ポップアップ：支払月（6桁）→ 支払先は25桁目から → 請求書No.は39桁目（支払先欄の外で打つと次の欄に入る）
+// 下払いポップアップ：右クリック「貼り付け（相対）」で1回。1行目＝支払月（先頭）＋支払先（25桁目）、2行目＝請求書No.（5桁目）
+function shitabaraiText(r){ var m = String(r.month || ""), s = String(r.sup || "");
+  return m + new Array(Math.max(1, 25 - m.length)).join(" ") + s + "\r\n    " + String(r.no || ""); }
+function shitabaraiShow(r){ return shitabaraiText(r).replace(/\r/g, ""); }
+// ---------- 荷主検索 ----------
+function normJa(s){ s = String(s || "").normalize("NFKC").toLowerCase().replace(/[\s　・\.,()（）㈱㈲]/g, "").replace(/株式会社|有限会社|合同会社/g, "");
+  return s.replace(/[ァ-ヶ]/g, function (c){ return String.fromCharCode(c.charCodeAt(0) - 0x60); }); }
+function ninushiName(code9){ for (var i = 0; i < NINUSHI.length; i++) if (NINUSHI[i][0] === code9) return NINUSHI[i][1]; return ""; }
+
+// ---------- 3レターコード：地名・コードのゆれを近いものに直す ----------
+var PORTS = [];     // 同上
+var PORT_CODE = {};
+function setMasters(m){ NINUSHI = m.ninushi || []; SHIHARAI = m.shiharai || []; PORTS = m.ports || []; PORT_CODE = {}; PORTS.forEach(function (p){ PORT_CODE[p[0]] = p; }); }
+function lev(a, b){ var m = a.length, n = b.length, d = []; for (var i = 0; i <= m; i++){ d[i] = [i]; } for (var j = 1; j <= n; j++) d[0][j] = j;
+  for (i = 1; i <= m; i++) for (j = 1; j <= n; j++) d[i][j] = Math.min(d[i - 1][j] + 1, d[i][j - 1] + 1, d[i - 1][j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1)); return d[m][n]; }
+function fixPort(q){
+  var raw = String(q || "").trim(); if (!raw) return null;
+  var s = raw.normalize("NFKC").toUpperCase();
+  if (/^[A-Z]{3}$/.test(s) && PORT_CODE[s]) return null;   // そのまま正しいコード
+  var place = s.split(/[,\-\/(]/)[0].replace(/[^A-Z ]/g, "").replace(/\s+/g, " ").trim(), key = place.replace(/ /g, "");
+  if (!key) return null;
+  var exact = PORTS.filter(function (p){ return p[1].replace(/[^A-Z]/g, "") === key; });
+  if (!exact.length) exact = PORTS.filter(function (p){ return p[1].split("/")[0].replace(/[^A-Z]/g, "") === key; });
+  if (exact.length) return { code: exact[0][0], note: "「" + raw + "」を " + exact[0][0] + "（" + exact[0][1] + (exact[0][2] ? "・" + exact[0][2] : "") + "）にしました" + (exact.length > 1 ? "。ほかの候補：" + exact.slice(1, 4).map(function (p){ return p[0]; }).join("・") : "") + "。" };
+  var best = null, bd = 99;
+  PORTS.forEach(function (p){ var k = p[1].replace(/[^A-Z]/g, ""); if (Math.abs(k.length - key.length) > 3) return; var dd = lev(key, k); if (dd < bd){ bd = dd; best = p; } });
+  if (/^[A-Z]{3}$/.test(s)){ var bc = null, bcd = 9; Object.keys(PORT_CODE).forEach(function (c){ var dd = lev(s, c); if (dd < bcd){ bcd = dd; bc = c; } });
+    if (best && bd <= 1) return { code: best[0], note: "「" + raw + "」はコード表にないので、地名の近い " + best[0] + "（" + best[1] + "）にしました。確認してください。" };
+    return { code: s, note: "「" + raw + "」はコード表にありません。確認してください。" }; }
+  if (best && bd <= Math.max(1, Math.floor(key.length / 4))) return { code: best[0], note: "「" + raw + "」は表記が違うようなので、近い " + best[0] + "（" + best[1] + (best[2] ? "・" + best[2] : "") + "）にしました。確認してください。" };
+  return { code: s.slice(0, 3), note: "「" + raw + "」に合う3レターコードが見つかりません。正しいコードに直してください。" };
+}
+function fixPorts(d){ d.warn = d.warn || []; ["dept", "dest"].forEach(function (k){ var r = fixPort(d.h[k]); if (r){ d.h[k] = r.code; d.warn.push((k === "dept" ? "DEPT" : "DEST") + "：" + r.note); } }); return d; }
+
+// ---------- 荷姿コード（PKG TYPE）：CTN→CT、PLT→PL のように直す ----------
+var PKGS = "BG BAG|BL BALE|BR BAR|BA BARREL|BK BASKET|BX BOX|VG BULK, GAS|VL BULK, LIQUID|BE BUNDLE|CG CAGE|CJ CAJA|CA CAN|CX CAN|CO CARBOY|CP CARBOY|CT CARTON|CS CASE|CK CASK|CH CHEST|CL COIL|CN CONTAINER|CNH CONTAINER|CN2 CONTAINER|CN4 CONTAINER|CR CRATE|CY CYLINDER|DJ DEMIJOHN|DP DEMIJOHN|DR DRUM|FB FIBER DRUM|FL FLASK|FT FLEX CNTR BAG|FR FRAME|VR GRAINS|HD HEAD|HG HOGSHEAD|IN INGOT|JR JAR|JG JUG|KG KEG|VQ LIQUEFIED GAS|LG LOG|LZ LOGS|MT MAT|NT NET|VO NODULE|ZZ OTHER|PK PACKAGE|PA PACKET|PT PALETA|PL PALLET|PC PARCEL|PE PEN|PS PIECE|PI PIPE|PZ PLANKS/PIPES|PG PLATE|PY PLATES|VY POWDERS|RL REEL|RO ROLL|SA SACK|SF SET|ST SHEET|SZ SHEET|SK SKELETON CASE|SI SKID|SB SLAB|SC STEEL CAN|SS STEEL CASE|SV STEEL ENVELOP|TC TANK CONTAINER|TI TIERCE|TN TIN|PU TRAY|TB TUB|UT UNIT|NE UNPACK|VK VANPACK|VA VAT|WC WOODEN CASE|WD WOODEN DRUM".split("|").map(function (s){ var i = s.indexOf(" "); return [s.slice(0, i), s.slice(i + 1)]; });
+var PKG_ALIAS = { CTN: "CT", CTNS: "CT", CARTONS: "CT", "C/T": "CT", PLT: "PL", PLTS: "PL", PALLETS: "PL", PALETTE: "PL", PALETTES: "PL", PKG: "PK", PKGS: "PK", PACKAGES: "PK",
+  CASES: "CS", BOXES: "BX", BXS: "BX", BAGS: "BG", DRUMS: "DR", PCS: "PS", PC: "PS", PIECES: "PS", ROLLS: "RO", BDL: "BE", BDLS: "BE", BUNDLES: "BE", CRATES: "CR", SETS: "SF",
+  UNITS: "UT", SKIDS: "SI", WCS: "WC", W_CASE: "WC", CNTR: "CN", COILS: "CL", REELS: "RL", SACKS: "SA", CANS: "CA", KEGS: "KG", TRAYS: "PU" };
+function fixPkg(q){
+  var raw = String(q || "").trim(); if (!raw) return null;
+  var s = raw.normalize("NFKC").toUpperCase().replace(/^\d+\s*/, "").trim();
+  if (PKGS.some(function (p){ return p[0] === s; })) return s === raw ? null : { code: s, note: "PKG TYPE「" + raw + "」を " + s + " にしました。" };
+  var c = PKG_ALIAS[s.replace(/[\s\.]/g, "")];
+  var name = function (cd){ for (var i = 0; i < PKGS.length; i++) if (PKGS[i][0] === cd) return PKGS[i][1]; return ""; };
+  if (!c){ var sing = s.replace(/(ES|S)$/, ""); PKGS.forEach(function (p){ if (!c && (p[1] === s || p[1] === sing)) c = p[0]; }); }
+  if (!c){ var best = null, bd = 9; PKGS.forEach(function (p){ var d = lev(s, p[1]); if (d < bd){ bd = d; best = p; } }); if (best && bd <= 1 && s.length >= 4) c = best[0]; }
+  if (c) return { code: c, note: "PKG TYPE「" + raw + "」を " + c + "（" + name(c) + "）にしました。" };
+  return { code: s.slice(0, 3), note: "PKG TYPE「" + raw + "」に合う荷姿コードが見つかりません。正しいコードに直してください。" };
+}
+//CORE-END
+
+(function (){
+  var data = null;
+  function $(id){ return document.getElementById(id); }
+  function showErr(m){ $("err").textContent = m; $("err").style.display = m ? "block" : "none"; }
+  function esc(s){ return String(s).replace(/[&<>]/g, function (c){ return { "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]; }); }
+
+  function copyText(t, btn, doneLabel, nextLabel){
+    function ok(){ btn.textContent = doneLabel || "コピーしました"; btn.classList.add("done"); setTimeout(function (){ btn.textContent = nextLabel || "コピー"; btn.classList.remove("done"); }, 1500); }
+    var done = false;
+    try { var ta = document.createElement("textarea"); ta.value = t; ta.setAttribute("readonly", ""); ta.style.position = "fixed"; ta.style.top = "0"; ta.style.left = "-9999px"; ta.style.opacity = "0";
+      var sx = window.scrollX, sy = window.scrollY; document.body.appendChild(ta); ta.focus({ preventScroll: true }); ta.select(); ta.setSelectionRange(0, t.length); done = document.execCommand("copy"); ta.remove(); window.scrollTo(sx, sy); } catch (e){}
+    if (done){ ok(); return; }
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(ok, function (){ alert("コピーできませんでした。下の文字を選んで Ctrl+C でコピーしてください。"); });
+  }
+  function previewHtml(rows){
+    return '<table class="pv">' + rows.map(function (r){ return "<tr>" + r.map(function (c){ var v = String(c[1] || "").trim();
+      return '<th>' + esc(c[0]) + "</th><td" + (v ? "" : ' class="empty"') + ">" + (v ? esc(v) : "（空）") + "</td>"; }).join("") + "</tr>"; }).join("") + "</table>";
+  }
+  function renderBlocks(){
+    data.contact = $("contact").value.trim();
+    var B = buildBlocks(data);
+    $("blocks").innerHTML = B.map(function (b, i){
+      return '<div class="box"><h2><span class="n">' + (i + 1) + "</span>" + esc(b.t) + '</h2><p class="how">' + esc(b.how) + "</p>" + (b.preview ? previewHtml(b.preview) : "") + "<pre>" + esc(b.text) + "</pre>" +
+        (b.lock ? '<div class="warn">' + esc(b.lockMsg || "先に CONTACT（社員番号6桁）を入力してください。") + '</div>' : '<button class="copy" data-i="' + i + '">コピー</button>') + "</div>";
+    }).join("");
+    Array.prototype.forEach.call($("blocks").querySelectorAll("button.copy"), function (btn){ btn.onclick = function (){ var i = +btn.dataset.i; copyText(B[i].text, btn); }; });
+    var sa = 0, sc = 0, tx = 0; data.lines.forEach(function (l){ sa += +l.amt || 0; sc += +l.cost || 0; if (l.tax) tx += +l.amt || 0; });
+    $("sum").innerHTML = "<span>明細 <b>" + data.lines.length + "</b> 行</span><span>合計 <b>" + sa.toLocaleString() + "</b></span><span>原価合計 <b>" + sc.toLocaleString() + "</b></span><span>消費税対象 <b>" + tx.toLocaleString() + "</b></span>";
+    $("warn").innerHTML = checks(data).map(esc).join("<br>");
+  }
+  function renderFields(){
+    $("mode").textContent = data.mode + "（" + MODES[data.mode].name + (data.hioki ? "・日置電機" : data.std ? "・入力シート" : "") + "）　端末：" + MODES[data.mode].screen;
+    $("fields").innerHTML = Object.keys(data.h).map(function (k){
+      return "<div><label>" + LABELS[k] + '</label><input data-k="' + k + '" value="' + esc(data.h[k] || "").replace(/"/g, "&quot;") + '"></div>';
+    }).join("");
+    Array.prototype.forEach.call($("fields").querySelectorAll("input"), function (inp){ inp.oninput = function (){ data.h[inp.dataset.k] = inp.value.trim(); renderBlocks(); if (inp.dataset.k === "acc1" || inp.dataset.k === "acc2") showNinushi(); }; });
+    showNinushi();
+  }
+  function handle(file){
+    if (!file) return;
+    $("fname").textContent = file.name; showErr("");
+    var rd = new FileReader();
+    rd.onload = function (e){
+      try {
+        data = fixPorts(readShijisho(XLSX.read(new Uint8Array(e.target.result), { type: "array", cellDates: true })));
+        document.body.classList.remove("air", "sea"); document.body.classList.add(MODES[data.mode].kind === "SEA" ? "sea" : "air");
+        renderFields(); renderBlocks(); $("out").style.display = "block";
+      } catch (er){ document.body.classList.remove("air", "sea"); $("out").style.display = "none"; showErr(er.message || String(er)); }
+    };
+    rd.readAsArrayBuffer(file);
+  }
+
+  // ---- 荷主名の表示と検索 ----
+  var YOMI = null, yomiLoading = false;
+  function showNinushi(){ if (!data) return; var nm = ninushiName((data.h.acc1 || "") + (data.h.acc2 || "000"));
+    $("ninushi").innerHTML = "荷主：" + (data.h.acc1 ? "<b>" + esc(data.h.acc1 + "-" + (data.h.acc2 || "000")) + "</b>　" : "") + (nm ? esc(nm) : '<span style="color:var(--warn)">' + (data.h.acc1 ? "一覧に見つかりません" : "ACC NO がありません。下で検索して選んでください") + "</span>"); }
+  function loadYomi(){
+    if (YOMI || yomiLoading) return; yomiLoading = true;
+    try { var c = localStorage.getItem("ninushi-yomi-v1-" + NINUSHI.length); if (c){ YOMI = JSON.parse(c); return; } } catch (e){}
+    $("nstat").textContent = "読み仮名での検索を準備しています…（初回だけ数秒かかります）";
+    var s = document.createElement("script"); s.src = "https://cdn.jsdelivr.net/npm/kuromoji@0.1.2/build/kuromoji.js";
+    s.onload = function (){ kuromoji.builder({ dicPath: "https://cdn.jsdelivr.net/npm/kuromoji@0.1.2/dict/" }).build(function (err, tk){
+      if (err){ $("nstat").textContent = "読み仮名の準備に失敗しました（漢字・英字では検索できます）"; return; }
+      YOMI = NINUSHI.map(function (n){ return normJa(tk.tokenize(n[1].replace(/株式会社|有限会社|合同会社|㈱|㈲/g, "")).map(function (x){ return x.reading || x.surface_form; }).join("")); });
+      try { localStorage.setItem("ninushi-yomi-v1-" + NINUSHI.length, JSON.stringify(YOMI)); } catch (e){}
+      $("nstat").textContent = ""; searchNinushi(); }); };
+    s.onerror = function (){ $("nstat").textContent = "読み仮名の準備に失敗しました（漢字・英字では検索できます）"; };
+    document.head.appendChild(s);
+  }
+  function searchNinushi(){
+    var q = normJa($("nq").value), box = $("nres"); if (!q){ box.style.display = "none"; return; }
+    var hits = []; for (var i = 0; i < NINUSHI.length && hits.length < 15; i++){ var n = NINUSHI[i];
+      if (n[0].indexOf(q) === 0 || normJa(n[1]).indexOf(q) !== -1 || (YOMI && YOMI[i] && YOMI[i].indexOf(q) !== -1)) hits.push(n); }
+    box.innerHTML = hits.length ? hits.map(function (n){ return '<div data-c="' + n[0] + '"><b>' + n[0].slice(0, 6) + "-" + n[0].slice(6) + "</b>" + esc(n[1]) + "</div>"; }).join("") : '<div style="cursor:default;color:var(--soft)">見つかりません</div>';
+    box.style.display = "block";
+    Array.prototype.forEach.call(box.querySelectorAll("div[data-c]"), function (el){ el.onclick = function (){
+      if (!data) return; data.h.acc1 = el.dataset.c.slice(0, 6); data.h.acc2 = el.dataset.c.slice(6);
+      $("nq").value = ""; box.style.display = "none"; renderFields(); renderBlocks(); }; });
+  }
+  $("nq").onfocus = loadYomi; $("nq").oninput = searchNinushi;
+  // ---- 下払いPDF ----
+  if (window.pdfjsLib) pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+  var PL = [];
+  function pdfText(buf){ return pdfjsLib.getDocument({ data: buf, cMapUrl: "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/cmaps/", cMapPacked: true }).promise.then(function (doc){ var ps = [];
+    for (var i = 1; i <= Math.min(doc.numPages, 3); i++) ps.push(doc.getPage(i).then(function (p){ return p.getTextContent(); }).then(function (tc){ return tc.items.map(function (x){ return x.str; }).join(" "); }));
+    return Promise.all(ps).then(function (a){ return a.join(" "); }); }); }
+  function renderPL(){
+    var opts = SHIHARAI.map(function (s){ return '<option value="' + s[0] + '">' + esc(s[1]) + "</option>"; }).join("");
+    $("plist").innerHTML = '<datalist id="suplist">' + opts + "</datalist>" + PL.map(function (r, i){
+      return '<div class="box" style="margin-top:10px"><div style="font-size:12px;color:var(--soft);margin-bottom:6px"><b style="color:var(--acc)">' + (i + 1) + "／" + PL.length + "枚目</b>　" + esc(r.file) + '</div><div class="sb">' +
+        '<div><label>支払月</label><input data-i="' + i + '" data-k="month" value="' + esc(r.month) + '" placeholder="202612"></div>' +
+        '<div><label>支払先（' + esc(supName(r.sup) || "番号を入力") + '）</label><input list="suplist" data-i="' + i + '" data-k="sup" value="' + esc(r.sup) + '"></div>' +
+        '<div><label>下払請求書No.</label><input data-i="' + i + '" data-k="no" value="' + esc(r.no) + '"></div></div>' +
+        (r.note ? '<div class="warn">' + esc(r.note) + "</div>" : "") + "<pre>" + esc(shitabaraiShow(r)) + "</pre>" +
+        (function (ready){ return '<button class="copy pcopy" data-i="' + i + '"' + (ready ? "" : ' style="display:none"') + '>' + "コピー" + '</button><div class="warn pwarn"' + (ready ? ' style="display:none"' : "") + '>支払月（6桁）・支払先・請求書No.をそろえるとコピーできます。</div>'; })(/^\d{6}$/.test(r.month) && r.sup && r.no) + "</div>";
+    }).join("");
+    Array.prototype.forEach.call($("plist").querySelectorAll("input[data-k]"), function (inp){ inp.oninput = function (){ var i = +inp.dataset.i, r = PL[i]; r[inp.dataset.k] = inp.value.trim();
+      var box = inp.closest(".box"); box.querySelector("pre").textContent = shitabaraiShow(r);
+      var lab = box.querySelector('input[data-k="sup"]').previousElementSibling; lab.textContent = "支払先（" + (supName(r.sup) || "番号を入力") + "）";
+      var ready = /^\d{6}$/.test(r.month) && r.sup && r.no, b = box.querySelector("button.pcopy"), w = box.querySelector(".pwarn");
+      if (b) b.style.display = ready ? "" : "none"; if (w) w.style.display = ready ? "none" : ""; }; });
+    Array.prototype.forEach.call($("plist").querySelectorAll("button.pcopy"), function (b){ b.onclick = function (){ var i = +b.dataset.i; copyText(shitabaraiText(PL[i]), b);
+      if (i === PL.length - 1) setTimeout(function (){ window.scrollTo({ top: 0, behavior: "smooth" }); }, 3000); }; });
+  }
+  function handlePdfs(files){
+    if (!window.pdfjsLib){ alert("PDFを読む部品が読み込めませんでした。インターネット接続を確認してください。"); return; }
+    var list = Array.prototype.slice.call(files, 0, 3);
+    if (files.length > 3) alert("一度に読み込めるのは3枚までです。最初の3枚を読み込みます。");
+    PL = list.map(function (f){ return { file: f.name, sup: "", no: "", month: "", note: "読み込み中…" }; }); renderPL();
+    list.forEach(function (f, i){
+      f.arrayBuffer().then(function (buf){ return pdfText(buf); }).then(function (t){ var r = readShitabarai(t, f.name); r.file = f.name; PL[i] = r; renderPL(); })
+        .catch(function (){ PL[i] = { file: f.name, sup: "", no: "", month: "", note: "PDFを読めませんでした。手で入力してください。" }; renderPL(); });
+    });
+  }
+  $("pfile").onchange = function (e){ handlePdfs(e.target.files); e.target.value = ""; };
+  var pz = $("pdrop");
+  ["dragenter", "dragover"].forEach(function (n){ pz.addEventListener(n, function (e){ e.preventDefault(); pz.classList.add("on"); }); });
+  ["dragleave", "drop"].forEach(function (n){ pz.addEventListener(n, function (e){ e.preventDefault(); pz.classList.remove("on"); }); });
+  pz.addEventListener("drop", function (e){ handlePdfs(e.dataTransfer.files); });
+
+  // ---- ログイン（梱包の哲と同じSupabaseのアカウント）とマスタ読み込み ----
+  var SB = window.supabase.createClient("https://ybfpqjrttiobybdgdmnt.supabase.co", "sb_publishable_uRW6yz4m44Kd8NpHMX7J_A_UE0ClBcA");
+  function loadMasters(){
+    return SB.from("hayato_master").select("key,data").then(function (r){
+      if (r.error) throw r.error; var m = {}; (r.data || []).forEach(function (x){ m[x.key] = x.data; }); setMasters(m); });
+  }
+  function enter(session){
+    $("lmsg").textContent = "データを読み込んでいます…";
+    loadMasters().then(function (){ $("login").style.display = "none"; $("who").style.display = "block"; $("whoe").textContent = session.user.email; })
+      .catch(function (e){ $("lmsg").textContent = "データを読み込めませんでした：" + (e.message || e); });
+  }
+  SB.auth.getSession().then(function (r){ if (r.data && r.data.session) enter(r.data.session); });
+  $("lf").onsubmit = function (e){ e.preventDefault(); $("lmsg").textContent = "確認しています…";
+    SB.auth.signInWithPassword({ email: $("le").value.trim(), password: $("lp").value }).then(function (r){
+      if (r.error){ $("lmsg").textContent = "メールアドレスかパスワードが違います。"; return; } enter(r.data.session); }); };
+  $("logout").onclick = function (e){ e.preventDefault(); SB.auth.signOut().then(function (){ location.reload(); }); };
+  $("contact").oninput = function (){ this.value = this.value.replace(/\D/g, "").slice(0, 6); if (data) renderBlocks(); };
+  $("file").onchange = function (e){ handle(e.target.files[0]); e.target.value = ""; };
+  var dz = $("drop");
+  ["dragenter", "dragover"].forEach(function (n){ dz.addEventListener(n, function (e){ e.preventDefault(); dz.classList.add("on"); }); });
+  ["dragleave", "drop"].forEach(function (n){ dz.addEventListener(n, function (e){ e.preventDefault(); dz.classList.remove("on"); }); });
+  dz.addEventListener("drop", function (e){ handle(e.dataTransfer.files[0]); });
+})();
+</script>
+</body>
+</html>
