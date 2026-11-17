@@ -2,6 +2,8 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
+<meta name="hayato-version" content="2026.11.17.1">
+<meta http-equiv="Cache-Control" content="no-cache">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>HAYATO 請求入力</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -136,7 +138,22 @@ body.sea #blocks .box button.copy.done,body.sea #plist .box button.copy.done{bac
     <div id="lmsg" style="font-size:12px;color:#a5633a;margin-top:10px;min-height:16px;text-align:center"></div>
   </form>
 </div>
-<div id="who" style="display:none;position:fixed;top:8px;right:12px;z-index:5;font-size:12px;background:rgba(255,255,255,.9);border:1px solid #c9dbec;border-radius:16px;padding:3px 10px"><span id="whoe"></span> ・ <a href="#" id="logout" style="color:#185FA5">ログアウト</a></div>
+<div id="updbar" style="display:none;position:fixed;top:0;left:0;right:0;z-index:20;background:#185FA5;color:#fff;text-align:center;padding:8px;font-size:14px">HAYATOの新しい版があります ・ <a href="#" id="updgo" style="color:#fff;font-weight:bold;text-decoration:underline">今すぐ更新</a></div>
+<script>
+(function(){
+  var V="2026.11.17.1";
+  try{ if(/[?&]v=/.test(location.search)) history.replaceState(null,"",location.pathname+location.hash); }catch(e){}
+  function latest(){ return fetch(location.pathname+"?nc="+Date.now(),{cache:"no-store"}).then(function(r){return r.text();}).then(function(t){ var m=t.match(/name="hayato-version" content="([^"]+)"/); return m?m[1]:null; }).catch(function(){return null;}); }
+  function go(){ location.replace(location.pathname+"?v="+Date.now()); }
+  function bar(){ document.getElementById("updbar").style.display="block"; }
+  latest().then(function(v){ if(!v||v===V) return; var k="hy_upd_"+v, done=false; try{ done=!!sessionStorage.getItem(k); sessionStorage.setItem(k,"1"); }catch(e){} if(done) bar(); else go(); });
+  function check(){ latest().then(function(v){ if(v&&v!==V) bar(); }); }
+  setInterval(check,10*60*1000);
+  document.addEventListener("visibilitychange",function(){ if(!document.hidden) check(); });
+  document.addEventListener("click",function(e){ var id=e.target&&e.target.id; if(id==="updgo"||id==="upd"){ e.preventDefault(); go(); } });
+})();
+</script>
+<div id="who" style="display:none;position:fixed;top:8px;right:12px;z-index:5;font-size:12px;background:rgba(255,255,255,.9);border:1px solid #c9dbec;border-radius:16px;padding:3px 10px"><span id="whoe"></span> ・ <span style="color:#888">v2026.11.17.1</span> ・ <a href="#" id="upd" style="color:#185FA5">最新版に更新</a> ・ <a href="#" id="logout" style="color:#185FA5">ログアウト</a></div>
 <div class="shell">
   <div class="hero"><div class="hv hv-def" style="width:100%;align-items:center;gap:18px;background:#0C447C;border-radius:10px;padding:16px 18px;overflow:hidden">
 <svg width="132" height="96" viewBox="0 0 132 96" aria-hidden="true" style="flex:0 0 auto">
