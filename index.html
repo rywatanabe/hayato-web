@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="hayato-version" content="2026.11.18.4">
+<meta name="hayato-version" content="2026.11.18.6">
 <meta http-equiv="Cache-Control" content="no-cache">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>HAYATO 請求入力</title>
@@ -141,7 +141,7 @@ body.sea #blocks .box button.copy.done,body.sea #plist .box button.copy.done{bac
 <div id="updbar" style="display:none;position:fixed;top:0;left:0;right:0;z-index:20;background:#185FA5;color:#fff;text-align:center;padding:8px;font-size:14px">HAYATOの新しい版があります ・ <a href="#" id="updgo" style="color:#fff;font-weight:bold;text-decoration:underline">今すぐ更新</a></div>
 <script>
 (function(){
-  var V="2026.11.18.4";
+  var V="2026.11.18.6";
   try{ if(/[?&]v=/.test(location.search)) history.replaceState(null,"",location.pathname+location.hash); }catch(e){}
   function latest(){ return fetch(location.pathname+"?nc="+Date.now(),{cache:"no-store"}).then(function(r){return r.text();}).then(function(t){ var m=t.match(/name="hayato-version" content="([^"]+)"/); return m?m[1]:null; }).catch(function(){return null;}); }
   function go(){ location.replace(location.pathname+"?v="+Date.now()); }
@@ -153,7 +153,7 @@ body.sea #blocks .box button.copy.done,body.sea #plist .box button.copy.done{bac
   document.addEventListener("click",function(e){ var id=e.target&&e.target.id; if(id==="updgo"||id==="upd"){ e.preventDefault(); go(); } });
 })();
 </script>
-<style>#who{display:none;max-width:820px;margin:-10px auto 12px;justify-content:flex-end;align-items:center;gap:10px;font-family:"Yu Gothic UI","Meiryo",sans-serif}#who .st{font-size:12px;color:#fff;background:rgba(4,44,83,.8);margin-right:auto;border-radius:14px;padding:4px 10px}#who button{background:#185FA5;color:#fff;border:2px solid #fff;border-radius:8px;padding:9px 18px;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 2px 8px rgba(0,0,0,.3)}#who button:hover{background:#0C447C}#updbar{z-index:20}</style><div id="who"><span class="st"><span id="whoe"></span> ・ v2026.11.18.4</span><button id="upd">⟳ 最新に更新</button><button id="logout">ログアウト</button></div>
+<style>#who{display:none;max-width:820px;margin:-10px auto 12px;justify-content:flex-end;flex-wrap:wrap;align-items:center;gap:10px;font-family:"Yu Gothic UI","Meiryo",sans-serif}#who .st{font-size:12px;color:#fff;background:rgba(4,44,83,.8);margin-right:auto;border-radius:14px;padding:4px 10px}#who button{white-space:nowrap;background:#185FA5;color:#fff;border:2px solid #fff;border-radius:8px;padding:9px 18px;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 2px 8px rgba(0,0,0,.3)}#who button:hover{background:#0C447C}#updbar{z-index:20}</style><div id="who"><span class="st"><span id="whoe"></span> ・ v2026.11.18.6</span><span id="vnote" style="display:none;font-size:12px;color:#7a4b00;background:#FFF4D6;border:1px solid #F0C36D;border-radius:14px;padding:4px 10px;order:9;flex-basis:100%;box-sizing:border-box;margin-top:2px"></span><button id="upd">⟳ 最新に更新</button><button id="logout">ログアウト</button></div>
 <div class="shell">
   <div class="hero"><div class="hv hv-def" style="width:100%;align-items:center;gap:18px;background:#0C447C;border-radius:10px;padding:16px 18px;overflow:hidden">
 <svg width="132" height="96" viewBox="0 0 132 96" aria-hidden="true" style="flex:0 0 auto">
@@ -777,7 +777,7 @@ function fixPkg(q){
     rd.onload = function (e){
       try {
         data = fixPorts(readShijisho(XLSX.read(new Uint8Array(e.target.result), { type: "array", cellDates: true })));
-        document.body.classList.remove("air", "sea"); document.body.classList.add(MODES[data.mode].kind === "SEA" ? "sea" : "air");
+        document.body.classList.remove("air", "sea"); window.HY_KIND = MODES[data.mode].kind === "SEA" ? "sea" : "air";
         renderFields(); renderBlocks(); window.HY_FORCE = false; window.HY_GATE();
       } catch (er){ document.body.classList.remove("air", "sea"); $("out").style.display = "none"; $("showbox").style.display = "none"; showErr(er.message || String(er)); }
     };
@@ -817,7 +817,7 @@ function fixPkg(q){
   var PL = [];
   window.HY_GATE = function (){ var has = !!$("fields").children.length && $("err").textContent === "";
     var show = has && (window.HY_FORCE || PL.length > 0);
-    $("out").style.display = show ? "block" : "none"; $("showbox").style.display = has && !show ? "block" : "none"; };
+    $("out").style.display = show ? "block" : "none"; document.body.classList.remove("air", "sea"); if (show && window.HY_KIND) document.body.classList.add(window.HY_KIND); $("showbox").style.display = has && !show ? "block" : "none"; };
   $("showout").onclick = function (){ window.HY_FORCE = true; window.HY_GATE(); };
   function pdfText(buf){ return pdfjsLib.getDocument({ data: buf, cMapUrl: "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/cmaps/", cMapPacked: true }).promise.then(function (doc){ var ps = [];
     for (var i = 1; i <= Math.min(doc.numPages, 3); i++) ps.push(doc.getPage(i).then(function (p){ return p.getTextContent(); }).then(function (tc){ return tc.items.map(function (x){ return x.str; }).join(" "); }));
@@ -865,7 +865,8 @@ function fixPkg(q){
   }
   function enter(session){
     $("lmsg").textContent = "データを読み込んでいます…";
-    loadMasters().then(function (){ $("login").style.display = "none"; $("who").style.display = "flex"; $("whoe").textContent = session.user.email; })
+    loadMasters().then(function (){ $("login").style.display = "none"; $("who").style.display = "flex"; (function (){ var NOTE = "海上の明細の貼り付け位置を修正／一覧は「一覧を表示」か下払いの読み込みで表示"; var last = null; try { last = localStorage.getItem("hy_ver"); localStorage.setItem("hy_ver", "2026.11.18.6"); } catch (e){}
+      if (last !== "2026.11.18.6" && NOTE){ var n = $("vnote"); n.textContent = "✨ 更新：" + NOTE; n.style.display = "inline-block"; } })(); $("whoe").textContent = session.user.email; })
       .catch(function (e){ $("lmsg").textContent = "データを読み込めませんでした：" + (e.message || e); });
   }
   SB.auth.getSession().then(function (r){ if (r.data && r.data.session) enter(r.data.session); });
