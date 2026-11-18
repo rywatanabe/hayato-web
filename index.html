@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="hayato-version" content="2026.11.17.5">
+<meta name="hayato-version" content="2026.11.18.1">
 <meta http-equiv="Cache-Control" content="no-cache">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>HAYATO 請求入力</title>
@@ -62,7 +62,7 @@ button.copy.done{background:var(--acc);color:#fff}
 .hv-air .lg2 .o,.hv-air .lg2 .ar{color:#D85A30}
 
 /* ロゴを主役に：大きく、中央に */
-body:not(.air):not(.sea) .hv-def{flex-direction:column;justify-content:center;text-align:center;padding:30px 18px 22px!important;background:radial-gradient(ellipse at 50% 40%,#185FA5 0%,#0C447C 55%,#042C53 100%)!important}
+body:not(.air):not(.sea) .hv-def{flex-direction:column;justify-content:center;text-align:center;padding:30px 18px 22px!important;background:radial-gradient(ellipse at 50% 40%,#2468C4 0%,#0F4A9E 55%,#062B66 100%)!important}
 body:not(.air):not(.sea) .hv-def > svg{width:96px;height:70px;opacity:.9}
 body:not(.air):not(.sea) .hv-def .brand{font-size:76px!important;letter-spacing:12px!important;line-height:1.05}
 body:not(.air):not(.sea) .hv-def .brand + div{font-size:13px!important;letter-spacing:6px!important}
@@ -126,7 +126,7 @@ body.sea #blocks .box button.copy.done,body.sea #plist .box button.copy.done{bac
 </style>
 </head>
 <body>
-<div id="login" style="position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;background:radial-gradient(ellipse at 50% 40%,#185FA5 0%,#0C447C 55%,#042C53 100%)">
+<div id="login" style="position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;background:radial-gradient(ellipse at 50% 40%,#2468C4 0%,#0F4A9E 55%,#062B66 100%)">
   <form id="lf" style="background:#fff;border-radius:12px;padding:28px 26px;width:min(360px,90vw);box-shadow:0 10px 40px rgba(0,0,0,.3)">
     <div class="brand" style="text-align:center;font-size:40px;color:#0C447C;margin-bottom:4px"><span class="lg2">HAYAT<span class="o" style="color:#D85A30">O</span><span class="ar" style="color:#D85A30">›››</span></span></div>
     <div style="text-align:center;font-size:12px;color:#5d7286;margin-bottom:18px">SEINO 国際部 ・ 請求入力ヘルパー</div>
@@ -141,7 +141,7 @@ body.sea #blocks .box button.copy.done,body.sea #plist .box button.copy.done{bac
 <div id="updbar" style="display:none;position:fixed;top:0;left:0;right:0;z-index:20;background:#185FA5;color:#fff;text-align:center;padding:8px;font-size:14px">HAYATOの新しい版があります ・ <a href="#" id="updgo" style="color:#fff;font-weight:bold;text-decoration:underline">今すぐ更新</a></div>
 <script>
 (function(){
-  var V="2026.11.17.5";
+  var V="2026.11.18.1";
   try{ if(/[?&]v=/.test(location.search)) history.replaceState(null,"",location.pathname+location.hash); }catch(e){}
   function latest(){ return fetch(location.pathname+"?nc="+Date.now(),{cache:"no-store"}).then(function(r){return r.text();}).then(function(t){ var m=t.match(/name="hayato-version" content="([^"]+)"/); return m?m[1]:null; }).catch(function(){return null;}); }
   function go(){ location.replace(location.pathname+"?v="+Date.now()); }
@@ -153,7 +153,7 @@ body.sea #blocks .box button.copy.done,body.sea #plist .box button.copy.done{bac
   document.addEventListener("click",function(e){ var id=e.target&&e.target.id; if(id==="updgo"||id==="upd"){ e.preventDefault(); go(); } });
 })();
 </script>
-<style>#who{display:none;max-width:820px;margin:-10px auto 12px;justify-content:flex-end;align-items:center;gap:10px;font-family:"Yu Gothic UI","Meiryo",sans-serif}#who .st{font-size:12px;color:#fff;background:rgba(4,44,83,.8);margin-right:auto;border-radius:14px;padding:4px 10px}#who button{background:#185FA5;color:#fff;border:2px solid #fff;border-radius:8px;padding:9px 18px;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 2px 8px rgba(0,0,0,.3)}#who button:hover{background:#0C447C}#updbar{z-index:20}</style><div id="who"><span class="st"><span id="whoe"></span> ・ v2026.11.17.5</span><button id="upd">⟳ 最新に更新</button><button id="logout">ログアウト</button></div>
+<style>#who{display:none;max-width:820px;margin:-10px auto 12px;justify-content:flex-end;align-items:center;gap:10px;font-family:"Yu Gothic UI","Meiryo",sans-serif}#who .st{font-size:12px;color:#fff;background:rgba(4,44,83,.8);margin-right:auto;border-radius:14px;padding:4px 10px}#who button{background:#185FA5;color:#fff;border:2px solid #fff;border-radius:8px;padding:9px 18px;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 2px 8px rgba(0,0,0,.3)}#who button:hover{background:#0C447C}#updbar{z-index:20}</style><div id="who"><span class="st"><span id="whoe"></span> ・ v2026.11.18.1</span><button id="upd">⟳ 最新に更新</button><button id="logout">ログアウト</button></div>
 <div class="shell">
   <div class="hero"><div class="hv hv-def" style="width:100%;align-items:center;gap:18px;background:#0C447C;border-radius:10px;padding:16px 18px;overflow:hidden">
 <svg width="132" height="96" viewBox="0 0 132 96" aria-hidden="true" style="flex:0 0 auto">
