@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="hayato-version" content="2026.11.26.1">
+<meta name="hayato-version" content="2026.11.27.1">
 <meta http-equiv="Cache-Control" content="no-cache">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>HAYATO 請求入力</title>
@@ -141,7 +141,7 @@ body.sea #blocks .box button.copy.done,body.sea #plist .box button.copy.done{bac
 <div id="updbar" style="display:none;position:fixed;top:0;left:0;right:0;z-index:20;background:#185FA5;color:#fff;text-align:center;padding:8px;font-size:14px">HAYATOの新しい版があります ・ <a href="#" id="updgo" style="color:#fff;font-weight:bold;text-decoration:underline">今すぐ更新</a></div>
 <script>
 (function(){
-  var V="2026.11.26.1";
+  var V="2026.11.27.1";
   try{ if(/[?&]v=/.test(location.search)) history.replaceState(null,"",location.pathname+location.hash); }catch(e){}
   function latest(){ return fetch(location.pathname+"?nc="+Date.now(),{cache:"no-store"}).then(function(r){return r.text();}).then(function(t){ var m=t.match(/name="hayato-version" content="([^"]+)"/); return m?m[1]:null; }).catch(function(){return null;}); }
   function go(){ location.replace(location.pathname+"?v="+Date.now()); }
@@ -153,7 +153,7 @@ body.sea #blocks .box button.copy.done,body.sea #plist .box button.copy.done{bac
   document.addEventListener("click",function(e){ var id=e.target&&e.target.id; if(id==="updgo"||id==="upd"){ e.preventDefault(); go(); } });
 })();
 </script>
-<style>#who{display:none;max-width:820px;margin:-10px auto 12px;justify-content:flex-end;flex-wrap:wrap;align-items:center;gap:10px;font-family:"Yu Gothic UI","Meiryo",sans-serif}#who .st{font-size:12px;color:#fff;background:rgba(4,44,83,.8);margin-right:auto;border-radius:14px;padding:4px 10px}#who button{white-space:nowrap;background:#185FA5;color:#fff;border:2px solid #fff;border-radius:8px;padding:9px 18px;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 2px 8px rgba(0,0,0,.3)}#who button:hover{background:#0C447C}#updbar{z-index:20}</style><div id="who"><span class="st"><span id="whoe"></span> ・ v2026.11.26.1</span><span id="vnote" style="display:none;font-size:12px;color:#7a4b00;background:#FFF4D6;border:1px solid #F0C36D;border-radius:14px;padding:4px 10px;order:9;flex-basis:100%;box-sizing:border-box;margin-top:2px"></span><button id="upd">⟳ 最新に更新</button><button id="logout">ログアウト</button></div>
+<style>#who{display:none;max-width:820px;margin:-10px auto 12px;justify-content:flex-end;flex-wrap:wrap;align-items:center;gap:10px;font-family:"Yu Gothic UI","Meiryo",sans-serif}#who .st{font-size:12px;color:#fff;background:rgba(4,44,83,.8);margin-right:auto;border-radius:14px;padding:4px 10px}#who button{white-space:nowrap;background:#185FA5;color:#fff;border:2px solid #fff;border-radius:8px;padding:9px 18px;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 2px 8px rgba(0,0,0,.3)}#who button:hover{background:#0C447C}#updbar{z-index:20}</style><div id="who"><span class="st"><span id="whoe"></span> ・ v2026.11.27.1</span><span id="vnote" style="display:none;font-size:12px;color:#7a4b00;background:#FFF4D6;border:1px solid #F0C36D;border-radius:14px;padding:4px 10px;order:9;flex-basis:100%;box-sizing:border-box;margin-top:2px"></span><button id="upd">⟳ 最新に更新</button><button id="logout">ログアウト</button></div>
 <div class="shell">
   <div class="hero"><div class="hv hv-def" style="width:100%;align-items:center;gap:18px;background:#0C447C;border-radius:10px;padding:16px 18px;overflow:hidden">
 <svg width="132" height="96" viewBox="0 0 132 96" aria-hidden="true" style="flex:0 0 auto">
@@ -674,6 +674,13 @@ function readShitabarai(text, fname){
   } else if (/阪急阪神|hh-express/i.test(z)){
     r.sup = "7"; m = t.match(/請求書\s*INVOICE\s+([0-9A-Z]+)/); if (m) r.no = m[1];
     m = t.match(/INVOICE DATE\s+(\S+)/); if (m) d = parseDate(m[1]);
+  } else if (/大衡運送|T1370001017476/.test(z)){
+    // 大衡運送：管理番号が請求書No.（同じ管理番号の請求書が複数あるときはシャシNo）。支払月は「〇月分」の2か月後（10月分→12月末払い）
+    r.sup = "8"; var ts = t.slice(Math.max(0, t.indexOf("管理番号")));
+    m = ts.match(/(?:^|[^A-Z0-9])([A-Z]{3,}\d{8,})(?![0-9])/); if (m) r.no = m[1];
+    m = ts.match(/(?:^|[^A-Z0-9])([A-Z]{4}\d{7})(?![0-9])/); if (m) r.alt = m[1];
+    m = z.match(/令和(\d+)年(\d{1,2})月/); if (m){ var bm = z.match(/\((\d{1,2})月分\)/), mo = bm ? +bm[1] : +m[2], yy = 2018 + +m[1]; if (bm && +bm[1] > +m[2]) yy--; d = [yy, mo + 1]; if (d[1] > 12){ d = [yy + 1, d[1] - 12]; } }
+    r.check = true;
   } else if (/NNRGLOBAL|西日本鉄道|T4290001009413/i.test(z)){
     r.sup = "139"; m = z.match(/(?:^|[^\d\-])(\d{3}-\d{6})(?![\d\-])/) || fn.match(/_(\d{3}-\d{6})(?!\d)/); if (m) r.no = m[1];
     d = parseDate(after("作成日", /\d{4}\/\d{1,2}\/\d{1,2}/) || "");
@@ -692,6 +699,7 @@ function readShitabarai(text, fname){
   // ラベルと値が離れて読めるPDFでは、請求書番号のすぐ後ろの最初の日付が発行日（請求日）
   if (!d && r.no && z.indexOf(r.no) >= 0){ var md = z.slice(z.indexOf(r.no) + r.no.length, z.indexOf(r.no) + r.no.length + 90).match(/\d{4}\/\d{1,2}\/\d{1,2}/); if (md) d = parseDate(md[0]); }
   r.month = nextMonth(d);
+  if (r.check && r.month) r.note = "大衡運送は支払月が特別です（" + (d ? (d[1] === 1 ? 12 : d[1] - 1) : "") + "月分→" + +r.month.slice(4) + "月末払い）。支払月を確かめて「支払月OK」を押してください。";
   if (r.sup && !r.no && !r.note) r.note = "請求書番号が読めませんでした。入力してください。";
   if (r.sup && !r.month && !r.note) r.note = "請求日が読めなかったので、支払月を入力してください。";
   return r;
@@ -840,6 +848,7 @@ function fixPkg(q){
     for (var i = 1; i <= Math.min(doc.numPages, 3); i++) ps.push(doc.getPage(i).then(function (p){ return p.getTextContent(); }).then(function (tc){ return tc.items.map(function (x){ return x.str; }).join(" "); }));
     return Promise.all(ps).then(function (a){ return a.join(" "); }); }); }
   function renderPL(){
+    PL.forEach(function (r){ if (r.sup === "8" && r.alt && r.no && PL.filter(function (x){ return x.sup === "8" && x.no === r.no; }).length > 1){ var same = r.no; PL.forEach(function (x){ if (x.sup === "8" && x.no === same && x.alt) x.no = x.alt; }); } });
     var opts = SHIHARAI.map(function (s){ return '<option value="' + s[0] + '">' + esc(s[1]) + "</option>"; }).join("");
     $("plist").innerHTML = '<datalist id="suplist">' + opts + "</datalist>" + PL.map(function (r, i){
       return '<div class="box" style="margin-top:10px"><div style="font-size:12px;color:var(--soft);margin-bottom:6px"><b style="color:var(--acc)">' + (i + 1) + "／" + PL.length + "枚目</b>　" + esc(r.file) + '</div><div class="sb">' +
@@ -847,15 +856,16 @@ function fixPkg(q){
         '<div><label>支払先（' + esc(supName(r.sup) || "番号を入力") + '）</label><input list="suplist" data-i="' + i + '" data-k="sup" value="' + esc(r.sup) + '"></div>' +
         '<div><label>下払請求書No.</label><input data-i="' + i + '" data-k="no" value="' + esc(r.no) + '"></div></div>' +
         (r.note ? '<div class="warn">' + esc(r.note) + "</div>" : "") + "<pre>" + esc(shitabaraiShow(r)) + "</pre>" +
-        (function (ready){ return '<button class="copy pcopy" data-i="' + i + '"' + (ready ? "" : ' style="display:none"') + '>' + "コピー" + '</button><div class="warn pwarn"' + (ready ? ' style="display:none"' : "") + '>支払月（6桁）・支払先・請求書No.をそろえるとコピーできます。</div>'; })(/^\d{6}$/.test(r.month) && r.sup && r.no) + "</div>";
+        (r.check && !r.ok ? '<button class="mok" data-i="' + i + '" style="margin:6px 0;padding:8px 16px;font-weight:800;border-radius:8px;border:2px solid #B07A00;background:#FFF4D6;color:#7a4b00;cursor:pointer">✔ 支払月OK（' + esc(r.month) + '）</button>' : "") + (function (ready){ return '<button class="copy pcopy" data-i="' + i + '"' + (ready ? "" : ' style="display:none"') + '>' + "コピー" + '</button><div class="warn pwarn"' + (ready ? ' style="display:none"' : "") + '>支払月（6桁）・支払先・請求書No.をそろえるとコピーできます。</div>'; })(/^\d{6}$/.test(r.month) && r.sup && r.no && (!r.check || r.ok)) + "</div>";
     }).join("");
     Array.prototype.forEach.call($("plist").querySelectorAll("input[data-k]"), function (inp){ inp.oninput = function (){ var i = +inp.dataset.i, r = PL[i]; r[inp.dataset.k] = inp.value.trim();
       var box = inp.closest(".box"); box.querySelector("pre").textContent = shitabaraiShow(r);
       var lab = box.querySelector('input[data-k="sup"]').previousElementSibling; lab.textContent = "支払先（" + (supName(r.sup) || "番号を入力") + "）";
-      var ready = /^\d{6}$/.test(r.month) && r.sup && r.no, b = box.querySelector("button.pcopy"), w = box.querySelector(".pwarn");
+      var ready = /^\d{6}$/.test(r.month) && r.sup && r.no && (!r.check || r.ok), b = box.querySelector("button.pcopy"), w = box.querySelector(".pwarn");
       if (b) b.style.display = ready ? "" : "none"; if (w) w.style.display = ready ? "none" : ""; }; });
     Array.prototype.forEach.call($("plist").querySelectorAll("button.pcopy"), function (b){ b.onclick = function (){ var i = +b.dataset.i; copyText(shitabaraiText(PL[i]), b);
       if (i === PL.length - 1) setTimeout(function (){ window.scrollTo({ top: 0, behavior: "smooth" }); }, 3000); }; });
+    Array.prototype.forEach.call($("plist").querySelectorAll("button.mok"), function (b){ b.onclick = function (){ PL[+b.dataset.i].ok = true; PL[+b.dataset.i].note = ""; renderPL(); }; });
     window.HY_GATE();
   }
   function handlePdfs(files){
@@ -882,8 +892,8 @@ function fixPkg(q){
   }
   function enter(session){
     $("lmsg").textContent = "データを読み込んでいます…";
-    loadMasters().then(function (){ $("login").style.display = "none"; $("who").style.display = "flex"; (function (){ var NOTE = "海上の重量（A/W）は小数第1位まで（第2位以下は切り捨て）"; var last = null; try { last = localStorage.getItem("hy_ver"); localStorage.setItem("hy_ver", "2026.11.26.1"); } catch (e){}
-      if (last !== "2026.11.26.1" && NOTE){ var n = $("vnote"); n.textContent = "✨ 更新：" + NOTE; n.style.display = "inline-block"; } })(); $("whoe").textContent = session.user.email; })
+    loadMasters().then(function (){ $("login").style.display = "none"; $("who").style.display = "flex"; (function (){ var NOTE = "下払いに大衡運送（支払先8）を追加・支払月の確認ボタン付き"; var last = null; try { last = localStorage.getItem("hy_ver"); localStorage.setItem("hy_ver", "2026.11.27.1"); } catch (e){}
+      if (last !== "2026.11.27.1" && NOTE){ var n = $("vnote"); n.textContent = "✨ 更新：" + NOTE; n.style.display = "inline-block"; } })(); $("whoe").textContent = session.user.email; })
       .catch(function (e){ $("lmsg").textContent = "データを読み込めませんでした：" + (e.message || e); });
   }
   SB.auth.getSession().then(function (r){ if (r.data && r.data.session) enter(r.data.session); });
