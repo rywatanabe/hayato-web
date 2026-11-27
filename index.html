@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="hayato-version" content="2026.11.27.1">
+<meta name="hayato-version" content="2026.11.27.2">
 <meta http-equiv="Cache-Control" content="no-cache">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>HAYATO 請求入力</title>
@@ -141,7 +141,7 @@ body.sea #blocks .box button.copy.done,body.sea #plist .box button.copy.done{bac
 <div id="updbar" style="display:none;position:fixed;top:0;left:0;right:0;z-index:20;background:#185FA5;color:#fff;text-align:center;padding:8px;font-size:14px">HAYATOの新しい版があります ・ <a href="#" id="updgo" style="color:#fff;font-weight:bold;text-decoration:underline">今すぐ更新</a></div>
 <script>
 (function(){
-  var V="2026.11.27.1";
+  var V="2026.11.27.2";
   try{ if(/[?&]v=/.test(location.search)) history.replaceState(null,"",location.pathname+location.hash); }catch(e){}
   function latest(){ return fetch(location.pathname+"?nc="+Date.now(),{cache:"no-store"}).then(function(r){return r.text();}).then(function(t){ var m=t.match(/name="hayato-version" content="([^"]+)"/); return m?m[1]:null; }).catch(function(){return null;}); }
   function go(){ location.replace(location.pathname+"?v="+Date.now()); }
@@ -153,7 +153,7 @@ body.sea #blocks .box button.copy.done,body.sea #plist .box button.copy.done{bac
   document.addEventListener("click",function(e){ var id=e.target&&e.target.id; if(id==="updgo"||id==="upd"){ e.preventDefault(); go(); } });
 })();
 </script>
-<style>#who{display:none;max-width:820px;margin:-10px auto 12px;justify-content:flex-end;flex-wrap:wrap;align-items:center;gap:10px;font-family:"Yu Gothic UI","Meiryo",sans-serif}#who .st{font-size:12px;color:#fff;background:rgba(4,44,83,.8);margin-right:auto;border-radius:14px;padding:4px 10px}#who button{white-space:nowrap;background:#185FA5;color:#fff;border:2px solid #fff;border-radius:8px;padding:9px 18px;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 2px 8px rgba(0,0,0,.3)}#who button:hover{background:#0C447C}#updbar{z-index:20}</style><div id="who"><span class="st"><span id="whoe"></span> ・ v2026.11.27.1</span><span id="vnote" style="display:none;font-size:12px;color:#7a4b00;background:#FFF4D6;border:1px solid #F0C36D;border-radius:14px;padding:4px 10px;order:9;flex-basis:100%;box-sizing:border-box;margin-top:2px"></span><button id="upd">⟳ 最新に更新</button><button id="logout">ログアウト</button></div>
+<style>#who{display:none;max-width:820px;margin:-10px auto 12px;justify-content:flex-end;flex-wrap:wrap;align-items:center;gap:10px;font-family:"Yu Gothic UI","Meiryo",sans-serif}#who .st{font-size:12px;color:#fff;background:rgba(4,44,83,.8);margin-right:auto;border-radius:14px;padding:4px 10px}#who button{white-space:nowrap;background:#185FA5;color:#fff;border:2px solid #fff;border-radius:8px;padding:9px 18px;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 2px 8px rgba(0,0,0,.3)}#who button:hover{background:#0C447C}#updbar{z-index:20}</style><div id="who"><span class="st"><span id="whoe"></span> ・ v2026.11.27.2</span><span id="vnote" style="display:none;font-size:12px;color:#7a4b00;background:#FFF4D6;border:1px solid #F0C36D;border-radius:14px;padding:4px 10px;order:9;flex-basis:100%;box-sizing:border-box;margin-top:2px"></span><button id="upd">⟳ 最新に更新</button><button id="logout">ログアウト</button></div>
 <div class="shell">
   <div class="hero"><div class="hv hv-def" style="width:100%;align-items:center;gap:18px;background:#0C447C;border-radius:10px;padding:16px 18px;overflow:hidden">
 <svg width="132" height="96" viewBox="0 0 132 96" aria-hidden="true" style="flex:0 0 auto">
@@ -659,16 +659,16 @@ function parseDate(s){ var m;
 function nextMonth(ym){ if (!ym) return ""; var y = ym[0], mo = ym[1] + 1; if (mo > 12){ mo = 1; y++; } return y + ("0" + mo).slice(-2); }
 function readShitabarai(text, fname){
   var t = text.normalize("NFKC").replace(/\s+/g, " "), z = t.replace(/ /g, ""), fn = fname || "", r = { sup: "", no: "", month: "", note: "" }, m, d = null;
-  var bpat = /B\d{3}[A-Z]{2}\d{8}-D\d{2}/, spat = /S0\d{11}/;
+  var bpat = /B\d{3}[A-Z]{2}\d{8}-D\d{2}/, spat = /S0\d{11}|F0\d{11}/;   // セイノー通関：S0＋11桁、またはF0＋11桁
   function after(label, re){ var i = z.indexOf(label); if (i < 0) return null; var mm = z.slice(i + label.length, i + label.length + 60).match(re); return mm ? mm[1] || mm[0] : null; }
   if (/SEINOLOGIX|セイノーロジックス|T7200001015755/i.test(z)){
     r.sup = "2"; m = t.match(/請求書\s+([A-Z]{2}\d{6,}(?:\/[A-Z0-9]+)?)/) || z.match(/請求書([A-Z]{2}\d{6,}(?:\/[A-Z0-9]+)?)/); if (m) r.no = m[1];
     m = t.match(/INVOICE DATE\s+(\S+)/); if (m) d = parseDate(m[1]);
   } else if (/後藤回漕店/.test(z) || (bpat.test(z) && !/阪急阪神|DSV/i.test(z))){
     r.sup = "5"; m = z.match(bpat); if (m) r.no = m[0]; d = parseDate(after("発行日", /\d{4}\/\d{1,2}\/\d{1,2}/) || "");
-  } else if (/T6010001080324|セイノー通関|SEINOCUSTOMS/i.test(z) || spat.test(z) || /^\d+-\d+_\d{8}_S0\d{11}/.test(fn.replace(/^[0-9a-f]{8}-/, ""))){
+  } else if (/T6010001080324|セイノー通関|SEINOCUSTOMS/i.test(z) || spat.test(z) || /^\d+-\d+_\d{8}_[SF]0\d{11}/.test(fn.replace(/^[0-9a-f]{8}-/, ""))){
     r.sup = "1"; m = z.match(spat) || fn.match(spat); if (m) r.no = m[0];
-    m = fn.match(/_(\d{4})(\d{2})(\d{2})_S0\d{11}/); d = m ? [+m[1], +m[2]] : parseDate(after("請求日", /\d{4}\/\d{1,2}\/\d{1,2}/) || "");
+    m = fn.match(/_(\d{4})(\d{2})(\d{2})_[SF]0\d{11}/); d = m ? [+m[1], +m[2]] : parseDate(after("請求日", /\d{4}\/\d{1,2}\/\d{1,2}/) || "");
   } else if (/セイノースーパーエクスプレス|ｾｲﾉｰｽｰﾊﾟｰ/.test(z) || /輸入請求書\(海上貨物\)|輸出請求書/.test(z)){
     r.sup = "3"; r.no = after("請求書番号", /:?([A-Z0-9\-]+)/) || ""; d = parseDate(after("請求日", /\d{4}\/\d{1,2}\/\d{1,2}/) || "");
   } else if (/阪急阪神|hh-express/i.test(z)){
@@ -693,7 +693,7 @@ function readShitabarai(text, fname){
     if (fsup && !(fn.match(bpat) || fn.match(spat))){ r.sup = fsup; r.note = "スキャン画像のPDFなので、ファイル名から支払先を判定しました。請求書No.と支払月を入力してください。"; }
     m = fn.match(bpat) || fn.match(spat);
     if (m){ r.no = m[0]; r.sup = m[0][0] === "B" ? "5" : "1"; r.note = "スキャン画像のPDFなので、ファイル名から請求書番号を拾いました。支払先と支払月を確認してください。";
-      var fd = fn.match(/_(\d{4})(\d{2})(\d{2})_S0\d{11}/); if (fd) d = [+fd[1], +fd[2]]; }
+      var fd = fn.match(/_(\d{4})(\d{2})(\d{2})_[SF]0\d{11}/); if (fd) d = [+fd[1], +fd[2]]; }
     else if (!r.sup) r.note = "スキャン画像のPDFで文字が読めません。手で入力してください。"; }
   else if (!r.sup) r.note = "支払先が判定できませんでした。手で入力してください。";
   // ラベルと値が離れて読めるPDFでは、請求書番号のすぐ後ろの最初の日付が発行日（請求日）
@@ -892,8 +892,8 @@ function fixPkg(q){
   }
   function enter(session){
     $("lmsg").textContent = "データを読み込んでいます…";
-    loadMasters().then(function (){ $("login").style.display = "none"; $("who").style.display = "flex"; (function (){ var NOTE = "下払いに大衡運送（支払先8）を追加・支払月の確認ボタン付き"; var last = null; try { last = localStorage.getItem("hy_ver"); localStorage.setItem("hy_ver", "2026.11.27.1"); } catch (e){}
-      if (last !== "2026.11.27.1" && NOTE){ var n = $("vnote"); n.textContent = "✨ 更新：" + NOTE; n.style.display = "inline-block"; } })(); $("whoe").textContent = session.user.email; })
+    loadMasters().then(function (){ $("login").style.display = "none"; $("who").style.display = "flex"; (function (){ var NOTE = "セイノー通関のF0から始まる請求書番号も読めるように"; var last = null; try { last = localStorage.getItem("hy_ver"); localStorage.setItem("hy_ver", "2026.11.27.2"); } catch (e){}
+      if (last !== "2026.11.27.2" && NOTE){ var n = $("vnote"); n.textContent = "✨ 更新：" + NOTE; n.style.display = "inline-block"; } })(); $("whoe").textContent = session.user.email; })
       .catch(function (e){ $("lmsg").textContent = "データを読み込めませんでした：" + (e.message || e); });
   }
   SB.auth.getSession().then(function (r){ if (r.data && r.data.session) enter(r.data.session); });
