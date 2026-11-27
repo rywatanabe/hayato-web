@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="hayato-version" content="2026.11.27.2">
+<meta name="hayato-version" content="2026.11.28.1">
 <meta http-equiv="Cache-Control" content="no-cache">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>HAYATO 請求入力</title>
@@ -141,7 +141,7 @@ body.sea #blocks .box button.copy.done,body.sea #plist .box button.copy.done{bac
 <div id="updbar" style="display:none;position:fixed;top:0;left:0;right:0;z-index:20;background:#185FA5;color:#fff;text-align:center;padding:8px;font-size:14px">HAYATOの新しい版があります ・ <a href="#" id="updgo" style="color:#fff;font-weight:bold;text-decoration:underline">今すぐ更新</a></div>
 <script>
 (function(){
-  var V="2026.11.27.2";
+  var V="2026.11.28.1";
   try{ if(/[?&]v=/.test(location.search)) history.replaceState(null,"",location.pathname+location.hash); }catch(e){}
   function latest(){ return fetch(location.pathname+"?nc="+Date.now(),{cache:"no-store"}).then(function(r){return r.text();}).then(function(t){ var m=t.match(/name="hayato-version" content="([^"]+)"/); return m?m[1]:null; }).catch(function(){return null;}); }
   function go(){ location.replace(location.pathname+"?v="+Date.now()); }
@@ -153,7 +153,7 @@ body.sea #blocks .box button.copy.done,body.sea #plist .box button.copy.done{bac
   document.addEventListener("click",function(e){ var id=e.target&&e.target.id; if(id==="updgo"||id==="upd"){ e.preventDefault(); go(); } });
 })();
 </script>
-<style>#who{display:none;max-width:820px;margin:-10px auto 12px;justify-content:flex-end;flex-wrap:wrap;align-items:center;gap:10px;font-family:"Yu Gothic UI","Meiryo",sans-serif}#who .st{font-size:12px;color:#fff;background:rgba(4,44,83,.8);margin-right:auto;border-radius:14px;padding:4px 10px}#who button{white-space:nowrap;background:#185FA5;color:#fff;border:2px solid #fff;border-radius:8px;padding:9px 18px;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 2px 8px rgba(0,0,0,.3)}#who button:hover{background:#0C447C}#updbar{z-index:20}</style><div id="who"><span class="st"><span id="whoe"></span> ・ v2026.11.27.2</span><span id="vnote" style="display:none;font-size:12px;color:#7a4b00;background:#FFF4D6;border:1px solid #F0C36D;border-radius:14px;padding:4px 10px;order:9;flex-basis:100%;box-sizing:border-box;margin-top:2px"></span><button id="upd">⟳ 最新に更新</button><button id="logout">ログアウト</button></div>
+<style>#who{display:none;max-width:820px;margin:-10px auto 12px;justify-content:flex-end;flex-wrap:wrap;align-items:center;gap:10px;font-family:"Yu Gothic UI","Meiryo",sans-serif}#who .st{font-size:12px;color:#fff;background:rgba(4,44,83,.8);margin-right:auto;border-radius:14px;padding:4px 10px}#who button{white-space:nowrap;background:#185FA5;color:#fff;border:2px solid #fff;border-radius:8px;padding:9px 18px;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 2px 8px rgba(0,0,0,.3)}#who button:hover{background:#0C447C}#updbar{z-index:20}</style><div id="who"><span class="st"><span id="whoe"></span> ・ v2026.11.28.1</span><span id="vnote" style="display:none;font-size:12px;color:#7a4b00;background:#FFF4D6;border:1px solid #F0C36D;border-radius:14px;padding:4px 10px;order:9;flex-basis:100%;box-sizing:border-box;margin-top:2px"></span><button id="upd">⟳ 最新に更新</button><button id="logout">ログアウト</button></div>
 <div class="shell">
   <div class="hero"><div class="hv hv-def" style="width:100%;align-items:center;gap:18px;background:#0C447C;border-radius:10px;padding:16px 18px;overflow:hidden">
 <svg width="132" height="96" viewBox="0 0 132 96" aria-hidden="true" style="flex:0 0 auto">
@@ -816,15 +816,21 @@ function fixPkg(q){
   function loadYomi(){
     if (YOMI || yomiLoading) return; yomiLoading = true;
     try { var c = localStorage.getItem("ninushi-yomi-v1-" + NINUSHI.length); if (c){ YOMI = JSON.parse(c); return; } } catch (e){}
-    $("nstat").textContent = "読み仮名での検索を準備しています…（初回だけ数秒かかります）";
-    var s = document.createElement("script"); s.src = "https://cdn.jsdelivr.net/npm/kuromoji@0.1.2/build/kuromoji.js";
-    s.onload = function (){ kuromoji.builder({ dicPath: "https://cdn.jsdelivr.net/npm/kuromoji@0.1.2/dict/" }).build(function (err, tk){
-      if (err){ $("nstat").textContent = "読み仮名の準備に失敗しました（漢字・英字では検索できます）"; return; }
-      YOMI = NINUSHI.map(function (n){ return normJa(tk.tokenize(n[1].replace(/株式会社|有限会社|合同会社|㈱|㈲/g, "")).map(function (x){ return x.reading || x.surface_form; }).join("")); });
-      try { localStorage.setItem("ninushi-yomi-v1-" + NINUSHI.length, JSON.stringify(YOMI)); } catch (e){}
-      $("nstat").textContent = ""; searchNinushi(); }); };
-    s.onerror = function (){ $("nstat").textContent = "読み仮名の準備に失敗しました（漢字・英字では検索できます）"; };
-    document.head.appendChild(s);
+    $("nstat").textContent = "読み仮名での検索を準備しています…（初回だけ少し時間がかかります。漢字・英字・コードではすぐ検索できます）";
+    // 重い処理（辞書の読み込み・1,900件の読み仮名づけ）は裏側（Web Worker）でやるので、画面は止まらない
+    var K = "https://cdn.jsdelivr.net/npm/kuromoji@0.1.2/";
+    var src = 'importScripts("' + K + 'build/kuromoji.js");onmessage=function(e){kuromoji.builder({dicPath:"' + K + 'dict/"}).build(function(err,tk){if(err){postMessage({err:String(err)});return;}' +
+      'postMessage({yomi:e.data.map(function(n){return tk.tokenize(n).map(function(x){return x.reading||x.surface_form;}).join("");})});});};';
+    var fail = function (){ yomiLoading = false; $("nstat").textContent = "読み仮名の準備ができませんでした（漢字・英字・コードでは検索できます）"; };
+    try {
+      var w = new Worker(URL.createObjectURL(new Blob([src], { type: "text/javascript" })));
+      w.onmessage = function (e){ w.terminate(); if (!e.data || e.data.err){ fail(); return; }
+        YOMI = e.data.yomi.map(normJa);
+        try { localStorage.setItem("ninushi-yomi-v1-" + NINUSHI.length, JSON.stringify(YOMI)); } catch (er){}
+        $("nstat").textContent = ""; if ($("nq").value) searchNinushi(); };
+      w.onerror = function (){ w.terminate(); fail(); };
+      w.postMessage(NINUSHI.map(function (n){ return n[1].replace(/株式会社|有限会社|合同会社|㈱|㈲/g, ""); }));
+    } catch (er){ fail(); }
   }
   function searchNinushi(){
     var q = normJa($("nq").value), box = $("nres"); if (!q){ box.style.display = "none"; return; }
@@ -892,8 +898,8 @@ function fixPkg(q){
   }
   function enter(session){
     $("lmsg").textContent = "データを読み込んでいます…";
-    loadMasters().then(function (){ $("login").style.display = "none"; $("who").style.display = "flex"; (function (){ var NOTE = "セイノー通関のF0から始まる請求書番号も読めるように"; var last = null; try { last = localStorage.getItem("hy_ver"); localStorage.setItem("hy_ver", "2026.11.27.2"); } catch (e){}
-      if (last !== "2026.11.27.2" && NOTE){ var n = $("vnote"); n.textContent = "✨ 更新：" + NOTE; n.style.display = "inline-block"; } })(); $("whoe").textContent = session.user.email; })
+    loadMasters().then(function (){ $("login").style.display = "none"; $("who").style.display = "flex"; (function (){ var NOTE = "荷主検索をクリックしたときに画面が止まる不具合を修正"; var last = null; try { last = localStorage.getItem("hy_ver"); localStorage.setItem("hy_ver", "2026.11.28.1"); } catch (e){}
+      if (last !== "2026.11.28.1" && NOTE){ var n = $("vnote"); n.textContent = "✨ 更新：" + NOTE; n.style.display = "inline-block"; } })(); $("whoe").textContent = session.user.email; })
       .catch(function (e){ $("lmsg").textContent = "データを読み込めませんでした：" + (e.message || e); });
   }
   SB.auth.getSession().then(function (r){ if (r.data && r.data.session) enter(r.data.session); });
