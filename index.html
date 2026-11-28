@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="hayato-version" content="2026.11.28.3">
+<meta name="hayato-version" content="2026.11.28.4">
 <meta http-equiv="Cache-Control" content="no-cache">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>HAYATO 請求入力</title>
@@ -151,7 +151,7 @@ body.sea #blocks .box button.copy.done,body.sea #plist .box button.copy.done{bac
 <div id="updbar" style="display:none;position:fixed;top:0;left:0;right:0;z-index:20;background:#185FA5;color:#fff;text-align:center;padding:8px;font-size:14px">HAYATOの新しい版があります ・ <a href="#" id="updgo" style="color:#fff;font-weight:bold;text-decoration:underline">今すぐ更新</a></div>
 <script>
 (function(){
-  var V="2026.11.28.3";
+  var V="2026.11.28.4";
   try{ if(/[?&]v=/.test(location.search)) history.replaceState(null,"",location.pathname+location.hash); }catch(e){}
   function latest(){ return fetch(location.pathname+"?nc="+Date.now(),{cache:"no-store"}).then(function(r){return r.text();}).then(function(t){ var m=t.match(/name="hayato-version" content="([^"]+)"/); return m?m[1]:null; }).catch(function(){return null;}); }
   function go(){ location.replace(location.pathname+"?v="+Date.now()); }
@@ -163,7 +163,7 @@ body.sea #blocks .box button.copy.done,body.sea #plist .box button.copy.done{bac
   document.addEventListener("click",function(e){ var id=e.target&&e.target.id; if(id==="updgo"||id==="upd"){ e.preventDefault(); go(); } });
 })();
 </script>
-<style>#who{display:none;max-width:820px;margin:-10px auto 12px;justify-content:flex-end;flex-wrap:wrap;align-items:center;gap:10px;font-family:"Yu Gothic UI","Meiryo",sans-serif}#who .st{font-size:12px;color:#fff;background:rgba(4,44,83,.8);margin-right:auto;border-radius:14px;padding:4px 10px}#who button{white-space:nowrap;background:#185FA5;color:#fff;border:2px solid #fff;border-radius:8px;padding:9px 18px;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 2px 8px rgba(0,0,0,.3)}#who button:hover{background:#0C447C}#updbar{z-index:20}</style><div id="who"><span class="st"><span id="whoe"></span> ・ v2026.11.28.3</span><span id="vnote" style="display:none;font-size:12px;color:#7a4b00;background:#FFF4D6;border:1px solid #F0C36D;border-radius:14px;padding:4px 10px;order:9;flex-basis:100%;box-sizing:border-box;margin-top:2px"></span><button id="setbtn" type="button">⚙ 設定</button><button id="upd">⟳ 最新に更新</button><button id="logout">ログアウト</button></div>
+<style>#who{display:none;max-width:820px;margin:-10px auto 12px;justify-content:flex-end;flex-wrap:wrap;align-items:center;gap:10px;font-family:"Yu Gothic UI","Meiryo",sans-serif}#who .st{font-size:12px;color:#fff;background:rgba(4,44,83,.8);margin-right:auto;border-radius:14px;padding:4px 10px}#who button{white-space:nowrap;background:#185FA5;color:#fff;border:2px solid #fff;border-radius:8px;padding:9px 18px;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 2px 8px rgba(0,0,0,.3)}#who button:hover{background:#0C447C}#updbar{z-index:20}</style><div id="who"><span class="st"><span id="whoe"></span> ・ v2026.11.28.4</span><span id="vnote" style="display:none;font-size:12px;color:#7a4b00;background:#FFF4D6;border:1px solid #F0C36D;border-radius:14px;padding:4px 10px;order:9;flex-basis:100%;box-sizing:border-box;margin-top:2px"></span><button id="setbtn" type="button">⚙ 設定</button><button id="upd">⟳ 最新に更新</button><button id="logout">ログアウト</button></div>
 <div class="shell">
   <div class="hero"><div class="hv hv-def" style="width:100%;align-items:center;gap:18px;background:#0C447C;border-radius:10px;padding:16px 18px;overflow:hidden">
 <svg width="132" height="96" viewBox="0 0 132 96" aria-hidden="true" style="flex:0 0 auto">
@@ -194,7 +194,7 @@ body.sea #blocks .box button.copy.done,body.sea #plist .box button.copy.done{bac
 <svg viewBox="0 0 680 18" width="100%" height="18" preserveAspectRatio="none" style="display:block" aria-hidden="true"><path d="M0 8 Q20 0 40 8 T80 8 T120 8 T160 8 T200 8 T240 8 T280 8 T320 8 T360 8 T400 8 T440 8 T480 8 T520 8 T560 8 T600 8 T640 8 T680 8 V18 H0Z" fill="#378ADD"/></svg></div></div>
   <p class="sub">指示書Excelを読み込むと、航空／海上請求情報登録に貼り付ける文字列を作ります（航空輸出・航空輸入・海上輸出・海上輸入に対応）。端末ではコピーボタン → Ctrl+V で貼り付けてください（Ctrl+V を PasteRelative に割り当てておく）。ファイルはこのブラウザの中だけで処理されます。</p>
 
-  <label class="drop" id="drop">指示書Excel（.xlsx）をクリックで選択、またはドラッグ＆ドロップ<input type="file" id="file" accept=".xlsx,.xlsm"></label>
+  <label class="drop" id="drop">指示書Excel と 下払いの請求書PDF を、ここにまとめてドラッグ＆ドロップ（クリックで選択もできます）<br><span style="font-size:12px;opacity:.8">指示書だけ・下払いだけでもOK。下払いはページ下の欄にも入れられます</span><input type="file" id="file" accept=".xlsx,.xlsm,.xls,.pdf" multiple></label>
   <div class="file" id="fname"></div>
   <div id="showbox" style="display:none;margin:8px 0 4px"><button id="showout" type="button" style="font-size:15px;font-weight:800;padding:9px 18px;border-radius:8px;border:2px solid #fff;background:#185FA5;color:#fff;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.3);font-family:inherit">📋 一覧を表示</button> <span style="font-size:12.5px;color:var(--soft)">下払いの請求書を入れると自動で表示されます</span></div>
   <div class="err" id="err"></div>
@@ -853,6 +853,7 @@ function fixPkg(q){
       try {
         data = fixPorts(readShijisho(XLSX.read(new Uint8Array(e.target.result), { type: "array", cellDates: true })));
         document.body.classList.remove("air", "sea"); window.HY_KIND = MODES[data.mode].kind === "SEA" ? "sea" : "air"; if (window.HY_KIND === "sea" && data.h && data.h.aw != null && data.h.aw !== ""){ var awv = String(data.h.aw).replace(/,/g, "").trim(); if (/^\d+(\.\d+)?$/.test(awv)) data.h.aw = String(Math.floor(Number(awv) * 10 + 1e-9) / 10); }   // 海上のA/Wは小数第1位まで（第2位以下は切り捨て）
+        if (PL.some(function (r){ return r.done; })){ PL = PL.filter(function (r){ return !r.done; }); renderPL(); }   // 前の案件でコピー済みの下払いは片づける
         renderFields(); renderBlocks(); window.HY_FORCE = false; window.HY_GATE();
       } catch (er){ document.body.classList.remove("air", "sea"); $("out").style.display = "none"; $("showbox").style.display = "none"; showErr(er.message || String(er)); }
     };
@@ -956,8 +957,8 @@ function fixPkg(q){
       $("setdlg").style.display = "none"; if (data) renderBlocks(); }); };
   function enter(session){
     $("lmsg").textContent = "データを読み込んでいます…";
-    Promise.all([loadMasters(), loadSettings(session)]).then(function (){ if (data) renderBlocks(); $("login").style.display = "none"; $("who").style.display = "flex"; (function (){ var NOTE = "⚙設定のBで、各ページにはそのページの明細に当たる下払いだけを出すように"; var last = null; try { last = localStorage.getItem("hy_ver"); localStorage.setItem("hy_ver", "2026.11.28.3"); } catch (e){}
-      if (last !== "2026.11.28.3" && NOTE){ var n = $("vnote"); n.textContent = "✨ 更新：" + NOTE; n.style.display = "inline-block"; } })(); $("whoe").textContent = session.user.email; })
+    Promise.all([loadMasters(), loadSettings(session)]).then(function (){ if (data) renderBlocks(); $("login").style.display = "none"; $("who").style.display = "flex"; (function (){ var NOTE = "いちばん上の欄に、指示書と下払いのPDFをまとめて入れられるように"; var last = null; try { last = localStorage.getItem("hy_ver"); localStorage.setItem("hy_ver", "2026.11.28.4"); } catch (e){}
+      if (last !== "2026.11.28.4" && NOTE){ var n = $("vnote"); n.textContent = "✨ 更新：" + NOTE; n.style.display = "inline-block"; } })(); $("whoe").textContent = session.user.email; })
       .catch(function (e){ $("lmsg").textContent = "データを読み込めませんでした：" + (e.message || e); });
   }
   SB.auth.getSession().then(function (r){ if (r.data && r.data.session) enter(r.data.session); });
@@ -966,11 +967,16 @@ function fixPkg(q){
       if (r.error){ $("lmsg").textContent = "メールアドレスかパスワードが違います。"; return; } enter(r.data.session); }); };
   $("logout").onclick = function (e){ e.preventDefault(); SB.auth.signOut().then(function (){ location.reload(); }); };
   $("contact").oninput = function (){ this.value = this.value.replace(/\D/g, "").slice(0, 6); if (data) renderBlocks(); };
-  $("file").onchange = function (e){ handle(e.target.files[0]); e.target.value = ""; };
+  // 上の欄：Excelは指示書、PDFは下払いとして振り分ける
+  function route(files){ var a = Array.prototype.slice.call(files || []);
+    var xl = a.filter(function (f){ return /\.(xlsx|xlsm|xls)$/i.test(f.name); }), pd = a.filter(function (f){ return /\.pdf$/i.test(f.name); });
+    if (xl.length) handle(xl[0]); if (pd.length) handlePdfs(pd);
+    if (!xl.length && !pd.length && a.length) showErr("Excel（指示書）かPDF（下払いの請求書）を入れてください。"); }
+  $("file").onchange = function (e){ route(e.target.files); e.target.value = ""; };
   var dz = $("drop");
   ["dragenter", "dragover"].forEach(function (n){ dz.addEventListener(n, function (e){ e.preventDefault(); dz.classList.add("on"); }); });
   ["dragleave", "drop"].forEach(function (n){ dz.addEventListener(n, function (e){ e.preventDefault(); dz.classList.remove("on"); }); });
-  dz.addEventListener("drop", function (e){ handle(e.dataTransfer.files[0]); });
+  dz.addEventListener("drop", function (e){ route(e.dataTransfer.files); });
 })();
 </script>
 </body>
