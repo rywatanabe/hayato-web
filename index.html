@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="hayato-version" content="2026.11.28.1">
+<meta name="hayato-version" content="2026.11.28.3">
 <meta http-equiv="Cache-Control" content="no-cache">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>HAYATO 請求入力</title>
@@ -138,10 +138,20 @@ body.sea #blocks .box button.copy.done,body.sea #plist .box button.copy.done{bac
     <div id="lmsg" style="font-size:12px;color:#a5633a;margin-top:10px;min-height:16px;text-align:center"></div>
   </form>
 </div>
+<div id="setdlg" style="display:none;position:fixed;inset:0;z-index:30;background:rgba(4,20,40,.55);align-items:center;justify-content:center;padding:16px">
+<div style="background:#fff;color:#1d2a36;border-radius:12px;max-width:440px;width:100%;padding:20px 22px;box-shadow:0 10px 30px rgba(0,0,0,.35);font-family:'Yu Gothic UI',Meiryo,sans-serif">
+<div style="font-size:17px;font-weight:800;margin-bottom:4px">⚙ 自分用の設定</div>
+<div style="font-size:12.5px;color:#5a6b7b;margin-bottom:14px">ログインしている人ごとに保存されます。どのパソコンで開いても同じ設定になります。</div>
+<div style="font-weight:700;font-size:14px;margin-bottom:8px">下払いのコピーを出す場所</div>
+<label style="display:block;padding:8px 10px;border:1px solid #d5dee8;border-radius:8px;margin-bottom:8px;cursor:pointer"><input type="radio" name="spos" value="A"> <b>A：最後にまとめる</b><br><span style="font-size:12.5px;color:#5a6b7b">明細を全部貼ってから、一番下で下払いを登録する</span></label>
+<label style="display:block;padding:8px 10px;border:1px solid #d5dee8;border-radius:8px;cursor:pointer"><input type="radio" name="spos" value="B"> <b>B：明細のページごと</b><br><span style="font-size:12.5px;color:#5a6b7b">明細の各ページのすぐ下に下払いを並べる（コピーしたものは「✔済」になります）</span></label>
+<div id="setmsg" style="font-size:12.5px;color:#a33;min-height:18px;margin-top:8px"></div>
+<div style="display:flex;gap:10px;justify-content:flex-end;margin-top:6px"><button id="setcancel" type="button" style="padding:8px 16px;border-radius:8px;border:1px solid #c5d0db;background:#fff;cursor:pointer;font-family:inherit">閉じる</button><button id="setsave" type="button" style="padding:8px 18px;border-radius:8px;border:0;background:#185FA5;color:#fff;font-weight:800;cursor:pointer;font-family:inherit">保存</button></div>
+</div></div>
 <div id="updbar" style="display:none;position:fixed;top:0;left:0;right:0;z-index:20;background:#185FA5;color:#fff;text-align:center;padding:8px;font-size:14px">HAYATOの新しい版があります ・ <a href="#" id="updgo" style="color:#fff;font-weight:bold;text-decoration:underline">今すぐ更新</a></div>
 <script>
 (function(){
-  var V="2026.11.28.1";
+  var V="2026.11.28.3";
   try{ if(/[?&]v=/.test(location.search)) history.replaceState(null,"",location.pathname+location.hash); }catch(e){}
   function latest(){ return fetch(location.pathname+"?nc="+Date.now(),{cache:"no-store"}).then(function(r){return r.text();}).then(function(t){ var m=t.match(/name="hayato-version" content="([^"]+)"/); return m?m[1]:null; }).catch(function(){return null;}); }
   function go(){ location.replace(location.pathname+"?v="+Date.now()); }
@@ -153,7 +163,7 @@ body.sea #blocks .box button.copy.done,body.sea #plist .box button.copy.done{bac
   document.addEventListener("click",function(e){ var id=e.target&&e.target.id; if(id==="updgo"||id==="upd"){ e.preventDefault(); go(); } });
 })();
 </script>
-<style>#who{display:none;max-width:820px;margin:-10px auto 12px;justify-content:flex-end;flex-wrap:wrap;align-items:center;gap:10px;font-family:"Yu Gothic UI","Meiryo",sans-serif}#who .st{font-size:12px;color:#fff;background:rgba(4,44,83,.8);margin-right:auto;border-radius:14px;padding:4px 10px}#who button{white-space:nowrap;background:#185FA5;color:#fff;border:2px solid #fff;border-radius:8px;padding:9px 18px;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 2px 8px rgba(0,0,0,.3)}#who button:hover{background:#0C447C}#updbar{z-index:20}</style><div id="who"><span class="st"><span id="whoe"></span> ・ v2026.11.28.1</span><span id="vnote" style="display:none;font-size:12px;color:#7a4b00;background:#FFF4D6;border:1px solid #F0C36D;border-radius:14px;padding:4px 10px;order:9;flex-basis:100%;box-sizing:border-box;margin-top:2px"></span><button id="upd">⟳ 最新に更新</button><button id="logout">ログアウト</button></div>
+<style>#who{display:none;max-width:820px;margin:-10px auto 12px;justify-content:flex-end;flex-wrap:wrap;align-items:center;gap:10px;font-family:"Yu Gothic UI","Meiryo",sans-serif}#who .st{font-size:12px;color:#fff;background:rgba(4,44,83,.8);margin-right:auto;border-radius:14px;padding:4px 10px}#who button{white-space:nowrap;background:#185FA5;color:#fff;border:2px solid #fff;border-radius:8px;padding:9px 18px;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 2px 8px rgba(0,0,0,.3)}#who button:hover{background:#0C447C}#updbar{z-index:20}</style><div id="who"><span class="st"><span id="whoe"></span> ・ v2026.11.28.3</span><span id="vnote" style="display:none;font-size:12px;color:#7a4b00;background:#FFF4D6;border:1px solid #F0C36D;border-radius:14px;padding:4px 10px;order:9;flex-basis:100%;box-sizing:border-box;margin-top:2px"></span><button id="setbtn" type="button">⚙ 設定</button><button id="upd">⟳ 最新に更新</button><button id="logout">ログアウト</button></div>
 <div class="shell">
   <div class="hero"><div class="hv hv-def" style="width:100%;align-items:center;gap:18px;background:#0C447C;border-radius:10px;padding:16px 18px;overflow:hidden">
 <svg width="132" height="96" viewBox="0 0 132 96" aria-hidden="true" style="flex:0 0 auto">
@@ -216,7 +226,7 @@ body.sea #blocks .box button.copy.done,body.sea #plist .box button.copy.done{bac
   </div>
   <div class="box" style="margin-top:18px">
     <h2>下払い紐づけ</h2>
-    <p class="how">下払いの請求書PDF（セイノー通関・セイノーロジックス・セイノースーパーエクスプレス・後藤回漕店・阪急阪神エクスプレス・DSV）をドロップすると、ポップアップに貼る文字を作ります。1回で3枚までまとめてドロップできます。<br>
+    <p class="how">下払いの請求書PDF（セイノー通関・セイノーロジックス・セイノースーパーエクスプレス・後藤回漕店・阪急阪神エクスプレス・DSV・西鉄・大衡運送）をドロップすると、ポップアップに貼る文字を作ります。何枚でもまとめてドロップできます。<br>
 <b>端末の手順</b>：明細の行で F6 → F2 → コピーボタン → <b>Ctrl+V</b>（支払月・支払先・請求書No.が一度に入ります）→ Enter（検索）→ 矢印で請求書の行へ → Enter<br>最後の1枚をコピーすると、3秒後に一番上に戻ります。</p>
     <label class="drop" id="pdrop" style="padding:16px">下払いの請求書PDFをクリックで選択、またはドラッグ＆ドロップ<input type="file" id="pfile" accept=".pdf" multiple></label>
     <div id="plist"></div>
@@ -780,13 +790,53 @@ function fixPkg(q){
     var B = buildBlocks(data);
     $("blocks").innerHTML = B.map(function (b, i){
       return '<div class="box"><h2><span class="n">' + (i + 1) + "</span>" + esc(b.t) + '</h2><p class="how">' + esc(b.how) + "</p>" + (b.preview ? previewHtml(b.preview) : "") + "<pre>" + esc(b.text) + "</pre>" +
-        (b.lock ? '<div class="warn">' + esc(b.lockMsg || "先に CONTACT（社員番号6桁）を入力してください。") + '</div>' : '<button class="copy" data-i="' + i + '">コピー</button>') + "</div>";
+        (b.lock ? '<div class="warn">' + esc(b.lockMsg || "先に CONTACT（社員番号6桁）を入力してください。") + '</div>' : '<button class="copy" data-i="' + i + '">コピー</button>') + "</div>" +
+        (HY_SET.shitaPos === "B" && /^明細 /.test(b.t) ? '<div class="box pmini" data-p="' + (parseInt(b.t.replace(/\D/g, ""), 10) - 1) + '" style="margin-top:10px"></div>' : "");
     }).join("");
     Array.prototype.forEach.call($("blocks").querySelectorAll("button.copy"), function (btn){ btn.onclick = function (){ var i = +btn.dataset.i; copyText(B[i].text, btn); }; });
     var sa = 0, sc = 0, tx = 0; data.lines.forEach(function (l){ sa += +l.amt || 0; sc += +l.cost || 0; if (l.tax) tx += +l.amt || 0; });
     $("sum").innerHTML = "<span>明細 <b>" + data.lines.length + "</b> 行</span><span>合計 <b>" + sa.toLocaleString() + "</b></span><span>原価合計 <b>" + sc.toLocaleString() + "</b></span><span>消費税対象 <b>" + tx.toLocaleString() + "</b></span>";
     $("warn").innerHTML = checks(data).map(esc).join("<br>");
+    renderMini();
   }
+  // B設定：明細の各ページの下に、下払いのコピーを並べる
+  function plReady(r){ return /^\d{6}$/.test(r.month) && r.sup && r.no && (!r.check || r.ok); }
+  function copyPL(i, btn){ copyText(shitabaraiText(PL[i]), btn); PL[i].done = true;
+    setTimeout(function (){ renderMini(); markDone(); }, 600);
+    if (PL.length && PL.every(function (r){ return r.done; })) setTimeout(function (){ window.scrollTo({ top: 0, behavior: "smooth" }); }, 3000); }
+  function markDone(){ Array.prototype.forEach.call($("plist").querySelectorAll("button.pcopy"), function (b){ var r = PL[+b.dataset.i]; if (r && r.done && b.textContent === "コピー") b.textContent = "✔済（もう一度コピー）"; }); }
+  // 請求書PDFの中の金額を拾う（明細の原価と照らし合わせるため）
+  function amountsOf(t){ var o = {}, m, re = /(\d{1,3}(?:,\d{3})+|\d+)(?![\d,])/g, z = String(t || "").normalize("NFKC");
+    while ((m = re.exec(z))){ var v = +m[1].replace(/,/g, ""); if (v > 0 && v < 1e8) o[v] = 1; } return Object.keys(o).map(Number); }
+  // どの明細行がどの下払いか（原価＝請求書のどれかの金額。なければ請求書の2つの金額の合計）
+  function matchPL(){
+    var lines = data ? data.lines : [], pages = [], lineOf = PL.map(function (){ return []; });
+    lines.forEach(function (l, li){ var c = Math.round(+String(l.cost).replace(/,/g, "") || 0); if (!c) return; var hit = [];
+      PL.forEach(function (r, pi){ if (r.amts && r.amts.indexOf(c) >= 0) hit.push(pi); });
+      if (!hit.length) PL.forEach(function (r, pi){ var a = (r.amts || []).filter(function (v){ return v < c; }).slice(0, 200), set = {}; a.forEach(function (v){ set[v] = 1; });
+        for (var k = 0; k < a.length; k++) if (set[c - a[k]] && c - a[k] !== a[k]){ hit.push(pi); break; } });
+      hit.forEach(function (pi){ var pg = Math.floor(li / 5); (pages[pg] = pages[pg] || {})[pi] = 1; lineOf[pi].push(li + 1); }); });
+    return { pages: pages, lineOf: lineOf };
+  }
+  function renderMini(){
+    var boxes = document.querySelectorAll(".pmini"); if (!boxes.length) return;
+    var mt = matchPL();
+    var row = function (r, i, none){ var nm = supName(r.sup);
+        return '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:6px 0;border-top:1px dashed #d5dee8">' +
+          '<span style="font-size:13px;min-width:0;flex:1"><b>' + (i + 1) + '.</b> ' + esc(r.month || "支払月?") + "　" + esc(r.sup || "?") + (nm ? "（" + esc(nm) + "）" : "") + "　" + esc(r.no || "請求書No.?") +
+          (mt.lineOf[i].length ? '<br><span style="font-size:12px;color:var(--soft)">明細 ' + mt.lineOf[i].join("・") + " 行目</span>" : "") +
+          (none ? '<br><span style="font-size:12px;color:var(--warn)">明細と金額が一致しなかったので、全ページに出しています</span>' : "") + "</span>" +
+          (plReady(r) ? '<button class="copy mcopy" data-i="' + i + '"' + (r.done ? ' style="background:#E1F5EE;color:#085041;border-color:#5DCAA5"' : "") + ">" + (r.done ? "✔済" : "コピー") + "</button>"
+            : '<span style="font-size:12px;color:var(--warn)">一番下の下払い欄で確認してください</span>') + "</div>"; };
+    Array.prototype.forEach.call(boxes, function (bx){ var pg = +bx.dataset.p, on = mt.pages[pg] || {};
+      var list = PL.map(function (r, i){ return { r: r, i: i, none: !mt.lineOf[i].length }; }).filter(function (x){ return on[x.i] || x.none; });
+      bx.innerHTML = '<h2 style="font-size:15px"><span class="n" style="background:#B07A00">払</span>このページの下払い</h2>' +
+        (!PL.length ? '<p class="how">下払いの請求書PDFを、ページ一番下の「下払い」欄に入れると、ここにコピーが出ます。</p>'
+          : !list.length ? '<p class="how">このページの明細に当たる下払いはありません。</p>'
+          : list.map(function (x){ return row(x.r, x.i, x.none); }).join(""));
+      Array.prototype.forEach.call(bx.querySelectorAll("button.mcopy"), function (b){ b.onclick = function (){ copyPL(+b.dataset.i, b); }; }); });
+  }
+
   function renderFields(){
     $("mode").textContent = data.mode + "（" + MODES[data.mode].name + (data.hioki ? "・日置電機" : data.std ? "・入力シート" : "") + "）　端末：" + MODES[data.mode].screen;
     $("fields").innerHTML = Object.keys(data.h).map(function (k){
@@ -869,18 +919,17 @@ function fixPkg(q){
       var lab = box.querySelector('input[data-k="sup"]').previousElementSibling; lab.textContent = "支払先（" + (supName(r.sup) || "番号を入力") + "）";
       var ready = /^\d{6}$/.test(r.month) && r.sup && r.no && (!r.check || r.ok), b = box.querySelector("button.pcopy"), w = box.querySelector(".pwarn");
       if (b) b.style.display = ready ? "" : "none"; if (w) w.style.display = ready ? "none" : ""; }; });
-    Array.prototype.forEach.call($("plist").querySelectorAll("button.pcopy"), function (b){ b.onclick = function (){ var i = +b.dataset.i; copyText(shitabaraiText(PL[i]), b);
-      if (i === PL.length - 1) setTimeout(function (){ window.scrollTo({ top: 0, behavior: "smooth" }); }, 3000); }; });
+    Array.prototype.forEach.call($("plist").querySelectorAll("button.pcopy"), function (b){ b.onclick = function (){ copyPL(+b.dataset.i, b); }; });
+    markDone(); renderMini();
     Array.prototype.forEach.call($("plist").querySelectorAll("button.mok"), function (b){ b.onclick = function (){ PL[+b.dataset.i].ok = true; PL[+b.dataset.i].note = ""; renderPL(); }; });
     window.HY_GATE();
   }
   function handlePdfs(files){
     if (!window.pdfjsLib){ alert("PDFを読む部品が読み込めませんでした。インターネット接続を確認してください。"); return; }
-    var list = Array.prototype.slice.call(files, 0, 3);
-    if (files.length > 3) alert("一度に読み込めるのは3枚までです。最初の3枚を読み込みます。");
+    var list = Array.prototype.slice.call(files);
     PL = list.map(function (f){ return { file: f.name, sup: "", no: "", month: "", note: "読み込み中…" }; }); renderPL();
     list.forEach(function (f, i){
-      f.arrayBuffer().then(function (buf){ return pdfText(buf); }).then(function (t){ var r = readShitabarai(t, f.name); r.file = f.name; PL[i] = r; renderPL(); })
+      f.arrayBuffer().then(function (buf){ return pdfText(buf); }).then(function (t){ var r = readShitabarai(t, f.name); r.file = f.name; r.amts = amountsOf(t); PL[i] = r; renderPL(); })
         .catch(function (){ PL[i] = { file: f.name, sup: "", no: "", month: "", note: "PDFを読めませんでした。手で入力してください。" }; renderPL(); });
     });
   }
@@ -896,10 +945,19 @@ function fixPkg(q){
     return SB.from("hayato_master").select("key,data").then(function (r){
       if (r.error) throw r.error; var m = {}; (r.data || []).forEach(function (x){ m[x.key] = x.data; }); setMasters(m); });
   }
+  var HY_SET = { shitaPos: "A" }, HY_UID = null;
+  function loadSettings(session){ HY_UID = session.user.id;
+    return SB.from("hayato_settings").select("data").eq("user_id", HY_UID).maybeSingle().then(function (r){ if (!r.error && r.data && r.data.data) for (var k in r.data.data) HY_SET[k] = r.data.data[k]; }, function (){}); }
+  $("setbtn").onclick = function (){ Array.prototype.forEach.call(document.querySelectorAll('input[name="spos"]'), function (x){ x.checked = x.value === HY_SET.shitaPos; }); $("setmsg").textContent = ""; $("setdlg").style.display = "flex"; };
+  $("setcancel").onclick = function (){ $("setdlg").style.display = "none"; };
+  $("setsave").onclick = function (){ var v = (document.querySelector('input[name="spos"]:checked') || {}).value || "A"; HY_SET.shitaPos = v; $("setmsg").textContent = "保存しています…";
+    SB.from("hayato_settings").upsert({ user_id: HY_UID, data: HY_SET, updated_at: new Date().toISOString() }).then(function (r){
+      if (r.error){ $("setmsg").textContent = "保存できませんでした：" + r.error.message; return; }
+      $("setdlg").style.display = "none"; if (data) renderBlocks(); }); };
   function enter(session){
     $("lmsg").textContent = "データを読み込んでいます…";
-    loadMasters().then(function (){ $("login").style.display = "none"; $("who").style.display = "flex"; (function (){ var NOTE = "荷主検索をクリックしたときに画面が止まる不具合を修正"; var last = null; try { last = localStorage.getItem("hy_ver"); localStorage.setItem("hy_ver", "2026.11.28.1"); } catch (e){}
-      if (last !== "2026.11.28.1" && NOTE){ var n = $("vnote"); n.textContent = "✨ 更新：" + NOTE; n.style.display = "inline-block"; } })(); $("whoe").textContent = session.user.email; })
+    Promise.all([loadMasters(), loadSettings(session)]).then(function (){ if (data) renderBlocks(); $("login").style.display = "none"; $("who").style.display = "flex"; (function (){ var NOTE = "⚙設定のBで、各ページにはそのページの明細に当たる下払いだけを出すように"; var last = null; try { last = localStorage.getItem("hy_ver"); localStorage.setItem("hy_ver", "2026.11.28.3"); } catch (e){}
+      if (last !== "2026.11.28.3" && NOTE){ var n = $("vnote"); n.textContent = "✨ 更新：" + NOTE; n.style.display = "inline-block"; } })(); $("whoe").textContent = session.user.email; })
       .catch(function (e){ $("lmsg").textContent = "データを読み込めませんでした：" + (e.message || e); });
   }
   SB.auth.getSession().then(function (r){ if (r.data && r.data.session) enter(r.data.session); });
