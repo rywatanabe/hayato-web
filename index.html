@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="hayato-version" content="2026.11.28.13">
+<meta name="hayato-version" content="2026.11.28.14">
 <meta http-equiv="Cache-Control" content="no-cache">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>HAYATO 請求入力</title>
@@ -153,7 +153,7 @@ body.sea #blocks .box button.copy.done,body.sea #plist .box button.copy.done{bac
 <div id="updbar" style="display:none;position:fixed;top:0;left:0;right:0;z-index:20;background:#185FA5;color:#fff;text-align:center;padding:8px;font-size:14px">HAYATOの新しい版があります ・ <a href="#" id="updgo" style="color:#fff;font-weight:bold;text-decoration:underline">今すぐ更新</a></div>
 <script>
 (function(){
-  var V="2026.11.28.13";
+  var V="2026.11.28.14";
   try{ if(/[?&]v=/.test(location.search)) history.replaceState(null,"",location.pathname+location.hash); }catch(e){}
   function latest(){ return fetch(location.pathname+"?nc="+Date.now(),{cache:"no-store"}).then(function(r){return r.text();}).then(function(t){ var m=t.match(/name="hayato-version" content="([^"]+)"/); return m?m[1]:null; }).catch(function(){return null;}); }
   function go(){ location.replace(location.pathname+"?v="+Date.now()); }
@@ -165,7 +165,7 @@ body.sea #blocks .box button.copy.done,body.sea #plist .box button.copy.done{bac
   document.addEventListener("click",function(e){ var id=e.target&&e.target.id; if(id==="updgo"||id==="upd"){ e.preventDefault(); go(); } });
 })();
 </script>
-<style>#who{display:none;max-width:820px;margin:-10px auto 12px;justify-content:flex-end;flex-wrap:wrap;align-items:center;gap:10px;font-family:"Yu Gothic UI","Meiryo",sans-serif}#who .st{font-size:12px;color:#fff;background:rgba(4,44,83,.8);margin-right:auto;border-radius:14px;padding:4px 10px}#who button{white-space:nowrap;background:#185FA5;color:#fff;border:2px solid #fff;border-radius:8px;padding:9px 18px;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 2px 8px rgba(0,0,0,.3)}#who button:hover{background:#0C447C}#updbar{z-index:20}</style><div id="who"><span class="st"><span id="whoe"></span> ・ v2026.11.28.13</span><span id="vnote" style="display:none;font-size:12px;color:#7a4b00;background:#FFF4D6;border:1px solid #F0C36D;border-radius:14px;padding:4px 10px;order:9;flex-basis:100%;box-sizing:border-box;margin-top:2px"></span><button id="setbtn" type="button">⚙ 設定</button><button id="upd">⟳ 最新に更新</button><button id="logout">ログアウト</button></div>
+<style>#who{display:none;max-width:820px;margin:-10px auto 12px;justify-content:flex-end;flex-wrap:wrap;align-items:center;gap:10px;font-family:"Yu Gothic UI","Meiryo",sans-serif}#who .st{font-size:12px;color:#fff;background:rgba(4,44,83,.8);margin-right:auto;border-radius:14px;padding:4px 10px}#who button{white-space:nowrap;background:#185FA5;color:#fff;border:2px solid #fff;border-radius:8px;padding:9px 18px;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 2px 8px rgba(0,0,0,.3)}#who button:hover{background:#0C447C}#updbar{z-index:20}</style><div id="who"><span class="st"><span id="whoe"></span> ・ v2026.11.28.14</span><span id="vnote" style="display:none;font-size:12px;color:#7a4b00;background:#FFF4D6;border:1px solid #F0C36D;border-radius:14px;padding:4px 10px;order:9;flex-basis:100%;box-sizing:border-box;margin-top:2px"></span><button id="setbtn" type="button">⚙ 設定</button><button id="upd">⟳ 最新に更新</button><button id="logout">ログアウト</button></div>
 <div class="shell">
 <style>
 /* アステップモード：ミッション演出 */
@@ -1011,8 +1011,8 @@ function fixPkg(q){
       $("setdlg").style.display = "none"; if (data) renderBlocks(); }); };
   function enter(session){
     $("lmsg").textContent = "データを読み込んでいます…";
-    Promise.all([loadMasters(), loadSettings(session)]).then(function (){ if (data) renderBlocks(); $("login").style.display = "none"; $("who").style.display = "flex"; (function (){ var NOTE = "アステップ：「混合」「サイゼリヤ」「CA1P」など、数字以外のシートもPDF名から選べるように"; var last = null; try { last = localStorage.getItem("hy_ver"); localStorage.setItem("hy_ver", "2026.11.28.13"); } catch (e){}
-      if (last !== "2026.11.28.13" && NOTE){ var n = $("vnote"); n.textContent = "✨ 更新：" + NOTE; n.style.display = "inline-block"; } })(); $("whoe").textContent = session.user.email; })
+    Promise.all([loadMasters(), loadSettings(session)]).then(function (){ if (data) renderBlocks(); $("login").style.display = "none"; $("who").style.display = "flex"; (function (){ var NOTE = "アステップ：RMKSにシートの「名称」（アステップ様（保管料）を除いたもの）を入れるように"; var last = null; try { last = localStorage.getItem("hy_ver"); localStorage.setItem("hy_ver", "2026.11.28.14"); } catch (e){}
+      if (last !== "2026.11.28.14" && NOTE){ var n = $("vnote"); n.textContent = "✨ 更新：" + NOTE; n.style.display = "inline-block"; } })(); $("whoe").textContent = session.user.email; })
       .catch(function (e){ $("lmsg").textContent = "データを読み込めませんでした：" + (e.message || e); });
   }
   SB.auth.getSession().then(function (r){ if (r.data && r.data.session) enter(r.data.session); });
@@ -1047,6 +1047,14 @@ function fixPkg(q){
       } catch (er){ showErr(er.message || String(er)); } };
     rd.readAsArrayBuffer(file); }
   // PDFのファイル名に入っているシート名を探す（数字の「415」だけでなく「混合」「サイゼリヤ」「CA1P」なども。いちばん長く一致する名前を使う）
+  // RMKS：シートの「名称」欄の内容から「アステップ様（保管料）」を除いたもの（例：No.415、サイゼリア様向けトラック配送料、温冷庫パーツ（CHC-17F-ECO BELT)）
+  function astepName(ws){ if (!ws || !ws["!ref"]) return ""; var R = XLSX.utils.decode_range(ws["!ref"]);
+    for (var r = R.s.r; r <= Math.min(R.e.r, R.s.r + 20); r++) for (var c = R.s.c; c <= Math.min(R.e.c, 12); c++){ var cl = ws[XLSX.utils.encode_cell({ r: r, c: c })];
+      if (!cl || String(cl.v).replace(/\s/g, "") !== "名称") continue;
+      for (var c2 = c + 1; c2 <= c + 15; c2++){ var v = ws[XLSX.utils.encode_cell({ r: r, c: c2 })]; if (!v || v.v == null || String(v.v).trim() === "") continue;
+        var t = String(v.v).replace(/^\s*アステップ様?\s*[（(][^）)]*[）)]\s*/, "").replace(/\s*[\r\n]+\s*/g, " ").trim();
+        return t.replace(/^NO\s*[.．]\s*/i, "No."); } }
+    return ""; }
   function astepPdf(f){ var K = function (x){ return String(x).normalize("NFKC").toUpperCase().replace(/[\s_\-]/g, "").replace(/ア$/, "ヤ"); };
     var fz = K(f.name.replace(/\.pdf$/i, "")), best = "";
     ASTEP.wb.SheetNames.forEach(function (x){ var k = K(x.trim()); if (!k) return;
@@ -1059,7 +1067,7 @@ function fixPkg(q){
     $("astepbar").innerHTML = '🅰 アステップモード　いま読み込んでいる案件：<b style="font-size:18px">No.' + esc(sn) + "</b>（" + esc(f.name) + "）<br>次の案件は、下払いのPDFを入れ替えるだけで切り替わります。";
     var sub = { SheetNames: [sn], Sheets: {} }; sub.Sheets[sn] = ASTEP.wb.Sheets[sn];
     applyWB(sub, function (){ if (!data.h.acc1){ data.h.acc1 = ASTEP_ACC[0]; data.h.acc2 = ASTEP_ACC[1]; }
-      var rk = "No." + sn; if ((data.h.rmks || "").indexOf(rk) < 0) data.h.rmks = rk + (data.h.rmks ? " " + data.h.rmks : ""); });   // RMKSに案件番号（No.415など）
+      var rk = astepName(sub.Sheets[sn]) || ("No." + sn); if ((data.h.rmks || "").indexOf(rk) < 0) data.h.rmks = rk + (data.h.rmks ? " " + data.h.rmks : ""); });
     handlePdfs([f]); }
   function route(files){ var a = Array.prototype.slice.call(files || []);
     var xl = a.filter(function (f){ return /\.(xlsx|xlsm|xls)$/i.test(f.name); }), pd = a.filter(function (f){ return /\.pdf$/i.test(f.name); });
